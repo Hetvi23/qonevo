@@ -1,0 +1,119 @@
+[
+    {
+        "doctype": "Custom Field",
+        "fieldname": "priority",
+        "label": "Priority",
+        "fieldtype": "Select",
+        "options": "Low\nMedium\nHigh\nUrgent",
+        "default": "Medium",
+        "insert_after": "order_type",
+        "parent": "Sales Order",
+        "reqd": 1,
+        "in_standard_filter": 1,
+        "in_list_view": 1,
+        "width": "100px"
+    },
+    {
+        "doctype": "Custom Field",
+        "fieldname": "priority_status",
+        "label": "Priority Status",
+        "fieldtype": "Select",
+        "options": "Pending\nIn Progress\nCompleted\nOn Hold",
+        "default": "Pending",
+        "insert_after": "priority",
+        "parent": "Sales Order",
+        "read_only": 1,
+        "in_standard_filter": 1,
+        "in_list_view": 1,
+        "width": "120px"
+    },
+    {
+        "doctype": "Custom Field",
+        "fieldname": "approval_section",
+        "label": "Approval Workflow",
+        "fieldtype": "Section Break",
+        "insert_after": "priority_status",
+        "parent": "Sales Order",
+        "collapsible": 1,
+        "collapsed": 1
+    },
+    {
+        "doctype": "Custom Field",
+        "fieldname": "finance_approval_status",
+        "label": "Finance Approval",
+        "fieldtype": "Select",
+        "options": "Pending\nApproved\nRejected",
+        "default": "Pending",
+        "insert_after": "approval_section",
+        "parent": "Sales Order",
+        "read_only": 1,
+        "in_standard_filter": 1,
+        "width": "120px"
+    },
+    {
+        "doctype": "Custom Field",
+        "fieldname": "finance_approval_date",
+        "label": "Finance Approval Date",
+        "fieldtype": "Datetime",
+        "insert_after": "finance_approval_status",
+        "parent": "Sales Order",
+        "read_only": 1,
+        "hidden": 1
+    },
+    {
+        "doctype": "Custom Field",
+        "fieldname": "finance_approver",
+        "label": "Finance Approver",
+        "fieldtype": "Link",
+        "options": "User",
+        "insert_after": "finance_approval_date",
+        "parent": "Sales Order",
+        "read_only": 1,
+        "hidden": 1
+    },
+    {
+        "doctype": "Custom Field",
+        "fieldname": "inventory_approval_status",
+        "label": "Inventory Approval",
+        "fieldtype": "Select",
+        "options": "Pending\nApproved\nRejected",
+        "default": "Pending",
+        "insert_after": "finance_approver",
+        "parent": "Sales Order",
+        "read_only": 1,
+        "in_standard_filter": 1,
+        "width": "120px"
+    },
+    {
+        "doctype": "Custom Field",
+        "fieldname": "inventory_approval_date",
+        "label": "Inventory Approval Date",
+        "fieldtype": "Datetime",
+        "insert_after": "inventory_approval_status",
+        "parent": "Sales Order",
+        "read_only": 1,
+        "hidden": 1
+    },
+    {
+        "doctype": "Custom Field",
+        "fieldname": "inventory_approver",
+        "label": "Inventory Approver",
+        "fieldtype": "Link",
+        "options": "User",
+        "insert_after": "inventory_approval_date",
+        "parent": "Sales Order",
+        "read_only": 1,
+        "hidden": 1
+    },
+    {
+        "doctype": "Custom Field",
+        "fieldname": "delivery_week",
+        "label": "Delivery Week",
+        "fieldtype": "Data",
+        "insert_after": "delivery_date",
+        "parent": "Sales Order",
+        "read_only": 1,
+        "in_standard_filter": 1,
+        "width": "100px"
+    }
+] 

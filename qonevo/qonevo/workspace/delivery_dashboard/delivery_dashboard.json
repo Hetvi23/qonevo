@@ -1,0 +1,32 @@
+{
+ "creation": "2025-01-27 10:00:00.000000",
+ "doctype": "Workspace",
+ "extends": "Selling",
+ "extends_another_page": 0,
+ "for_user": "Administrator",
+ "icon": "chart-line",
+ "is_default": 0,
+ "is_standard": 0,
+ "label": "Delivery Dashboard",
+ "links": [
+  {
+   "hidden": 0,
+   "icon": "chart-line",
+   "label": "Delivery Overview",
+   "link_type": "Page",
+   "name": "delivery-dashboard-page",
+   "onboard": 0,
+   "type": "Card Break"
+  }
+ ],
+ "modified": "2025-01-27 10:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Qonevo",
+ "name": "delivery-dashboard",
+ "owner": "Administrator",
+ "page_name": "delivery-dashboard",
+ "pin_to_bottom": 0,
+ "pin_to_top": 0,
+ "shortcuts": [],
+ "shortcuts_label": ""
+} 

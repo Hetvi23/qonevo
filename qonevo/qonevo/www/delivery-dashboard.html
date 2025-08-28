@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Delivery Dashboard</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .delivery-dashboard {
+            padding: 20px;
+        }
+        .page-header {
+            margin-bottom: 30px;
+        }
+        .card {
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            border: none;
+            margin-bottom: 20px;
+        }
+        .card-header {
+            background-color: #f8f9fa;
+            border-bottom: 1px solid #dee2e6;
+        }
+        .priority-badge {
+            font-size: 0.75em;
+        }
+    </style>
+</head>
+<body>
+    <div class="delivery-dashboard">
+        <div class="page-header">
+            <h1 class="page-title">Delivery Dashboard</h1>
+            <p class="text-muted">Priority-based delivery tracking system</p>
+        </div>
+
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="card">
+                    <div class="card-body text-center">
+                        <h3 class="text-primary" id="total-orders">-</h3>
+                        <p class="text-muted">Total Orders</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card">
+                    <div class="card-body text-center">
+                        <h3 class="text-success" id="total-qty">-</h3>
+                        <p class="text-muted">Total Quantity</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card">
+                    <div class="card-body text-center">
+                        <h3 class="text-info" id="total-amount">-</h3>
+                        <p class="text-muted">Total Amount</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card">
+                    <div class="card-body text-center">
+                        <h3 class="text-warning" id="priority-levels">-</h3>
+                        <p class="text-muted">Priority Levels</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5>Priority Distribution</h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="priority-chart">
+                            <p class="text-muted">Loading priority data...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5>This Week's Deliveries</h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="delivery-schedule">
+                            <p class="text-muted">Loading delivery data...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h5>Sales Orders with Priority</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th>Sales Order</th>
+                                <th>Customer</th>
+                                <th>Priority</th>
+                                <th>Delivery Date</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="orders-table">
+                            <tr>
+                                <td colspan="5" class="text-center text-muted">Loading orders...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Simple dashboard functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            // For now, show placeholder data
+            document.getElementById('total-orders').textContent = '5';
+            document.getElementById('total-qty').textContent = '150';
+            document.getElementById('total-amount').textContent = '₹15,000';
+            document.getElementById('priority-levels').textContent = '4';
+            
+            // Update priority chart
+            document.getElementById('priority-chart').innerHTML = `
+                <div class="mb-2">
+                    <div class="d-flex justify-content-between">
+                        <span class="badge bg-danger priority-badge">Urgent</span>
+                        <span class="font-weight-bold">2</span>
+                    </div>
+                </div>
+                <div class="mb-2">
+                    <div class="d-flex justify-content-between">
+                        <span class="badge bg-warning priority-badge">High</span>
+                        <span class="font-weight-bold">1</span>
+                    </div>
+                </div>
+                <div class="mb-2">
+                    <div class="d-flex justify-content-between">
+                        <span class="badge bg-info priority-badge">Medium</span>
+                        <span class="font-weight-bold">1</span>
+                    </div>
+                </div>
+                <div class="mb-2">
+                    <div class="d-flex justify-content-between">
+                        <span class="badge bg-secondary priority-badge">Low</span>
+                        <span class="font-weight-bold">1</span>
+                    </div>
+                </div>
+            `;
+            
+            // Update delivery schedule
+            document.getElementById('delivery-schedule').innerHTML = `
+                <div class="mb-2">
+                    <strong>This Week:</strong> 3 orders scheduled
+                </div>
+                <div class="mb-2">
+                    <strong>Next Week:</strong> 2 orders scheduled
+                </div>
+            `;
+            
+            // Update orders table
+            document.getElementById('orders-table').innerHTML = `
+                <tr>
+                    <td><a href="/app/sales-order/SAL-ORD-2025-00001" target="_blank">SAL-ORD-2025-00001</a></td>
+                    <td>Sample Customer 1</td>
+                    <td><span class="badge bg-danger priority-badge">Urgent</span></td>
+                    <td>2025-07-31</td>
+                    <td><span class="badge bg-warning">Pending</span></td>
+                </tr>
+                <tr>
+                    <td><a href="/app/sales-order/SAL-ORD-2025-00002" target="_blank">SAL-ORD-2025-00002</a></td>
+                    <td>Sample Customer 2</td>
+                    <td><span class="badge bg-warning priority-badge">High</span></td>
+                    <td>2025-08-01</td>
+                    <td><span class="badge bg-info">In Progress</span></td>
+                </tr>
+                <tr>
+                    <td><a href="/app/sales-order/SAL-ORD-2025-00003" target="_blank">SAL-ORD-2025-00003</a></td>
+                    <td>Sample Customer 3</td>
+                    <td><span class="badge bg-info priority-badge">Medium</span></td>
+                    <td>2025-08-02</td>
+                    <td><span class="badge bg-success">Completed</span></td>
+                </tr>
+            `;
+        });
+    </script>
+</body>
+</html> 

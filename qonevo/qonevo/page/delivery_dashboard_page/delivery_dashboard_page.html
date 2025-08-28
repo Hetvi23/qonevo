@@ -1,0 +1,183 @@
+{% extends "templates/web.html" %}
+
+{% block page_content %}
+<div class="delivery-dashboard-embedded">
+    <div class="row">
+        <!-- Summary Cards -->
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-body text-center">
+                    <h3 class="text-primary" id="total-orders">{{ total_orders or 0 }}</h3>
+                    <p class="text-muted">Total Orders</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-body text-center">
+                    <h3 class="text-success" id="total-qty">{{ total_qty or 0 }}</h3>
+                    <p class="text-muted">Total Quantity</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-body text-center">
+                    <h3 class="text-info" id="total-amount">₹{{ total_amount or 0 }}</h3>
+                    <p class="text-muted">Total Amount</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-body text-center">
+                    <h3 class="text-warning" id="this-week">{{ this_week_count or 0 }}</h3>
+                    <p class="text-muted">This Week</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-4">
+        <!-- Priority Distribution -->
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Priority Distribution</h5>
+                </div>
+                <div class="card-body">
+                    {% for priority in priority_data %}
+                    <div class="mb-2">
+                        <div class="d-flex justify-content-between">
+                            <span class="badge bg-{{ priority.color }} priority-badge">{{ priority.name }}</span>
+                            <span class="font-weight-bold">{{ priority.count }}</span>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Delivery Schedule -->
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Delivery Schedule</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Order</th>
+                                    <th>Customer</th>
+                                    <th>Priority</th>
+                                    <th>Delivery Date</th>
+                                    <th>Status</th>
+                                    <th>Quantity</th>
+                                </tr>
+                            </thead>
+                            <tbody id="delivery-table">
+                                {% for order in delivery_data %}
+                                <tr>
+                                    <td><a href="/app/sales-order/{{ order.name }}" target="_blank">{{ order.name }}</a></td>
+                                    <td>{{ order.customer }}</td>
+                                    <td><span class="badge bg-{{ order.priority_color }} priority-badge">{{ order.priority }}</span></td>
+                                    <td>{{ order.delivery_date }}</td>
+                                    <td><span class="badge bg-{{ order.status_color }}">{{ order.priority_status }}</span></td>
+                                    <td>{{ order.total_qty }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.delivery-dashboard-embedded {
+    padding: 20px;
+}
+
+.card {
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    margin-bottom: 20px;
+}
+
+.card-header {
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #dee2e6;
+    padding: 15px 20px;
+}
+
+.priority-badge {
+    font-size: 0.8em;
+    padding: 5px 10px;
+}
+
+.table th {
+    background-color: #f8f9fa;
+    border-top: none;
+}
+
+.bg-urgent { background-color: #dc3545 !important; }
+.bg-high { background-color: #fd7e14 !important; }
+.bg-medium { background-color: #007bff !important; }
+.bg-low { background-color: #6c757d !important; }
+.bg-pending { background-color: #ffc107 !important; color: #000 !important; }
+.bg-completed { background-color: #28a745 !important; }
+</style>
+
+<script>
+// Auto-refresh dashboard data every 30 seconds
+setInterval(function() {
+    frappe.call({
+        method: 'qonevo.page.delivery_dashboard_page.delivery_dashboard_page.get_dashboard_data',
+        callback: function(r) {
+            if (r.message) {
+                updateDashboard(r.message);
+            }
+        }
+    });
+}, 30000);
+
+function updateDashboard(data) {
+    // Update summary cards
+    if (data.total_orders !== undefined) {
+        document.getElementById('total-orders').textContent = data.total_orders;
+    }
+    if (data.total_qty !== undefined) {
+        document.getElementById('total-qty').textContent = data.total_qty;
+    }
+    if (data.total_amount !== undefined) {
+        document.getElementById('total-amount').textContent = '₹' + data.total_amount;
+    }
+    if (data.this_week_count !== undefined) {
+        document.getElementById('this-week').textContent = data.this_week_count;
+    }
+    
+    // Update delivery table
+    if (data.delivery_data) {
+        const tableBody = document.getElementById('delivery-table');
+        tableBody.innerHTML = '';
+        
+        data.delivery_data.forEach(function(order) {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td><a href="/app/sales-order/${order.name}" target="_blank">${order.name}</a></td>
+                <td>${order.customer}</td>
+                <td><span class="badge bg-${order.priority_color} priority-badge">${order.priority}</span></td>
+                <td>${order.delivery_date}</td>
+                <td><span class="badge bg-${order.status_color}">${order.priority_status}</span></td>
+                <td>${order.total_qty}</td>
+            `;
+            tableBody.appendChild(row);
+        });
+    }
+}
+</script>
+{% endblock %} 

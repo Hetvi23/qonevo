@@ -1,0 +1,17 @@
+{
+ "creation": "2025-01-27 10:00:00.000000",
+ "doctype": "Page",
+ "for_user": "Administrator",
+ "has_web_view": 0,
+ "is_standard": 0,
+ "modified": "2025-01-27 10:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Qonevo",
+ "name": "delivery-dashboard-page",
+ "owner": "Administrator",
+ "page_name": "delivery-dashboard-page",
+ "published": 1,
+ "route": "delivery-dashboard-page",
+ "template": "delivery_dashboard_page.html",
+ "title": "Delivery Dashboard"
+} 

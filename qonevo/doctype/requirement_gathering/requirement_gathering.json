@@ -1,0 +1,250 @@
+{
+ "actions": [
+  {
+   "action": "qonevo.requirement_gathering.requirement_gathering.approve_items",
+   "action_type": "Server Action",
+   "label": "Approve All",
+   "condition": "doc.status == 'Draft'"
+  },
+  {
+   "action": "qonevo.requirement_gathering.requirement_gathering.reject_items",
+   "action_type": "Server Action",
+   "label": "Reject All",
+   "condition": "doc.status == 'Draft'"
+  },
+  {
+   "action": "qonevo.requirement_gathering.requirement_gathering.create_purchase_order",
+   "action_type": "Server Action",
+   "label": "Create Purchase Order",
+   "condition": "doc.status == 'Approved' && !doc.purchase_order_ref"
+  },
+  {
+   "action": "qonevo.requirement_gathering.requirement_gathering.create_purchase_receipt",
+   "action_type": "Server Action",
+   "label": "Create Purchase Receipt",
+   "condition": "doc.purchase_order_ref && !doc.purchase_receipt_ref"
+  }
+ ],
+ "allow_rename": 1,
+ "autoname": "format:REQ-{####}",
+ "creation": "2025-01-27 10:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "date",
+  "supplier",
+  "supplier_name",
+  "supplier_address",
+  "contact_person",
+  "gstin",
+  "payment_terms",
+  "supply_terms",
+  "transport_details",
+  "column_break_10",
+  "purchase_order_ref",
+  "purchase_receipt_ref",
+  "section_break_13",
+  "requirement_item",
+  "section_break_15",
+  "status"
+ ],
+ "fields": [
+  {
+   "fieldname": "date",
+   "fieldtype": "Date",
+   "label": "Date",
+   "reqd": 1,
+   "default": "Today"
+  },
+  {
+   "fieldname": "supplier",
+   "fieldtype": "Link",
+   "label": "Supplier",
+   "options": "Supplier",
+   "reqd": 1,
+   "on_change": "qonevo.requirement_gathering.requirement_gathering.fetch_supplier_details",
+   "get_query": "function() { return { filters: [['Supplier', 'disabled', '=', 0]] } }"
+  },
+  {
+   "fieldname": "supplier_name",
+   "fieldtype": "Data",
+   "label": "Supplier Name",
+   "read_only": 1,
+   "depends_on": "supplier"
+  },
+  {
+   "fieldname": "supplier_address",
+   "fieldtype": "Small Text",
+   "label": "Supplier Address",
+   "read_only": 1,
+   "depends_on": "supplier"
+  },
+  {
+   "fieldname": "contact_person",
+   "fieldtype": "Data",
+   "label": "Contact Person",
+   "read_only": 1,
+   "depends_on": "supplier"
+  },
+  {
+   "fieldname": "gstin",
+   "fieldtype": "Data",
+   "label": "GSTIN",
+   "read_only": 1,
+   "depends_on": "supplier"
+  },
+  {
+   "fieldname": "payment_terms",
+   "fieldtype": "Data",
+   "label": "Payment Terms",
+   "read_only": 1,
+   "depends_on": "supplier"
+  },
+  {
+   "fieldname": "supply_terms",
+   "fieldtype": "Data",
+   "label": "Supply Terms",
+   "read_only": 1,
+   "depends_on": "supplier"
+  },
+  {
+   "fieldname": "transport_details",
+   "fieldtype": "Data",
+   "label": "Transport Details",
+   "read_only": 1,
+   "depends_on": "supplier"
+  },
+  {
+   "fieldname": "purchase_order_ref",
+   "fieldtype": "Link",
+   "label": "Purchase Order Ref",
+   "options": "Purchase Order",
+   "read_only": 1
+  },
+  {
+   "fieldname": "purchase_receipt_ref",
+   "fieldtype": "Link",
+   "label": "Purchase Receipt Ref",
+   "options": "Purchase Receipt",
+   "read_only": 1
+  },
+  {
+   "fieldname": "requirement_item",
+   "fieldtype": "Table",
+   "label": "Requirement Item",
+   "options": "Requirement Items",
+   "reqd": 1
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "label": "Status",
+   "options": "Draft\nApproved\nRejected\nPO Created\nPR Created",
+   "default": "Draft",
+   "read_only": 1
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [
+  {
+   "group": "Purchase",
+   "link_doctype": "Purchase Order",
+   "link_fieldname": "purchase_order_ref",
+   "parent_doctype": "Requirement Gathering"
+  },
+  {
+   "group": "Purchase",
+   "link_doctype": "Purchase Receipt",
+   "link_fieldname": "purchase_receipt_ref",
+   "parent_doctype": "Requirement Gathering"
+  }
+ ],
+ "modified": "2025-01-27 10:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Qonevo",
+ "name": "Requirement Gathering",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Purchase Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Purchase User",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Stock User",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [
+  {
+   "color": "gray",
+   "style": "Draft",
+   "title": "Draft"
+  },
+  {
+   "color": "green",
+   "style": "Approved",
+   "title": "Approved"
+  },
+  {
+   "color": "red",
+   "style": "Rejected",
+   "title": "Rejected"
+  },
+  {
+   "color": "blue",
+   "style": "PO Created",
+   "title": "PO Created"
+  },
+  {
+   "color": "purple",
+   "style": "PR Created",
+   "title": "PR Created"
+  }
+ ],
+ "track_changes": 1,
+ "track_seen": 1,
+ "track_views": 1,
+ "title_field": "name",
+ "search_fields": "name,supplier,supplier_name,contact_person"
+} 

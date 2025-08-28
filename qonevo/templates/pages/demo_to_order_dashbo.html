@@ -1,0 +1,17 @@
+{% extends "templates/web.html" %}
+
+{% block page_content %}
+<div class="container">
+    <h2 style="text-align:center;">Demo to Order Conversion Dashboard</h2>
+    <div class="row" style="margin-top:30px;">
+        <div class="col-md-6">
+            <canvas id="conversionChart"></canvas>
+        </div>
+        <div class="col-md-6">
+            <div id="conversionRate" style="font-size: 28px; color: green; text-align: center; margin-top: 50px;">
+                Loading Conversion Rate...
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

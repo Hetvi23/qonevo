@@ -10,6 +10,13 @@ app_license = "mit"
 
 # required_apps = []
 
+
+doctype_js = {
+    "Serial No" : "public/js/serial_no.js",
+    "Sales Order" : "public/js/sales_order_priority.js",
+    "Requirement Gathering" : "qonevo/qonevo/doctype/requirement_gathering/requirement_gathering.js",
+    "Requirement Items" : "qonevo/qonevo/doctype/requirement_items/requirement_items.js"
+}
 # Each item in the list will be shown as an app in the apps page
 # add_to_apps_screen = [
 # 	{
@@ -26,7 +33,11 @@ app_license = "mit"
 
 # include js, css files in header of desk.html
 # app_include_css = "/assets/qonevo/css/qonevo.css"
-# app_include_js = "/assets/qonevo/js/qonevo.js"
+app_include_js = [
+    # Temporarily disabled to fix sidebar issues
+    # "/assets/qonevo/js/helpdesk_vue_override.js",
+    # "/assets/qonevo/js/helpdesk_list_view_override.js"
+]
 
 # include js, css files in header of web template
 # web_include_css = "/assets/qonevo/css/qonevo.css"
@@ -41,6 +52,14 @@ app_license = "mit"
 
 # include js in page
 # page_js = {"page" : "public/js/file.js"}
+
+# Pages
+# ------------------
+page_js = {
+    "delivery-dashboard": "qonevo/page/delivery_dashboard/delivery_dashboard.js"
+}
+
+
 
 # include js in doctype views
 # doctype_js = {"doctype" : "public/js/doctype.js"}
@@ -129,21 +148,22 @@ app_license = "mit"
 # ---------------
 # Override standard doctype classes
 
-# override_doctype_class = {
-# 	"ToDo": "custom_app.overrides.CustomToDo"
-# }
+override_doctype_class = {
+	"Sales Order": "qonevo.overrides.sales_order.QonevoSalesOrder"
+}
 
 # Document Events
 # ---------------
 # Hook on document methods and events
 
-# doc_events = {
-# 	"*": {
-# 		"on_update": "method",
-# 		"on_cancel": "method",
-# 		"on_trash": "method"
-# 	}
-# }
+doc_events = {
+    "Sales Order": {
+        "after_submit" : "qonevo.overrides.sales_order.after_submit"
+    },
+    "Serial No":{
+        "before_insert": "qonevo.overrides.serial_no_handlers.set_model_and_size"
+    }
+}
 
 # Scheduled Tasks
 # ---------------
@@ -171,12 +191,15 @@ app_license = "mit"
 
 # before_tests = "qonevo.install.before_tests"
 
-# Overriding Methods
+# Whitelisted Methods
 # ------------------------------
 #
-# override_whitelisted_methods = {
-# 	"frappe.desk.doctype.event.event.get_events": "qonevo.event.get_events"
-# }
+whitelisted_methods = [
+    "qonevo.api.get_status_counts",
+    "qonevo.api.get_list_data",
+    "qonevo.api.get_filterable_fields",
+    "qonevo.api.get_quick_filters"
+]
 #
 # each overriding function accepts a `data` argument;
 # generated from the base implementation of the doctype dashboard,
@@ -242,3 +265,6 @@ app_license = "mit"
 # 	"Logging DocType Name": 30  # days to retain logs
 # }
 
+
+# Temporarily disabled fixtures to fix installation
+fixtures = []

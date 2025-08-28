@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Delivery Dashboard - Embedded</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .dashboard-container {
+            padding: 20px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        .card {
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            border: none;
+            margin-bottom: 20px;
+        }
+        .card-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 10px 10px 0 0 !important;
+            padding: 15px 20px;
+        }
+        .summary-card {
+            text-align: center;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+            background: white;
+        }
+        .summary-card h3 {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        .summary-card p {
+            color: #6c757d;
+            font-size: 1.1rem;
+            margin: 0;
+        }
+        .priority-badge {
+            font-size: 0.8em;
+            padding: 6px 12px;
+            border-radius: 20px;
+        }
+        .table th {
+            background-color: #f8f9fa;
+            border-top: none;
+            font-weight: 600;
+        }
+        .bg-urgent { background-color: #dc3545 !important; }
+        .bg-high { background-color: #fd7e14 !important; }
+        .bg-medium { background-color: #007bff !important; }
+        .bg-low { background-color: #6c757d !important; }
+        .bg-pending { background-color: #ffc107 !important; color: #000 !important; }
+        .bg-completed { background-color: #28a745 !important; }
+        .loading {
+            text-align: center;
+            padding: 50px;
+            color: #6c757d;
+        }
+        .refresh-btn {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Header -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="mb-0">
+                            <i class="fas fa-chart-line me-2"></i>
+                            Delivery Dashboard
+                        </h2>
+                        <p class="mb-0 mt-2">Real-time delivery tracking and priority management</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Refresh Button -->
+        <button class="btn btn-primary refresh-btn" onclick="loadDashboardData()">
+            <i class="fas fa-sync-alt"></i> Refresh
+        </button>
+
+        <!-- Summary Cards -->
+        <div class="row" id="summary-cards">
+            <div class="col-md-3">
+                <div class="summary-card">
+                    <div class="text-primary">
+                        <i class="fas fa-shopping-cart fa-2x mb-3"></i>
+                        <h3 id="total-orders">-</h3>
+                        <p>Total Orders</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="summary-card">
+                    <div class="text-success">
+                        <i class="fas fa-boxes fa-2x mb-3"></i>
+                        <h3 id="total-qty">-</h3>
+                        <p>Total Quantity</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="summary-card">
+                    <div class="text-info">
+                        <i class="fas fa-rupee-sign fa-2x mb-3"></i>
+                        <h3 id="total-amount">₹-</h3>
+                        <p>Total Amount</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="summary-card">
+                    <div class="text-warning">
+                        <i class="fas fa-calendar-week fa-2x mb-3"></i>
+                        <h3 id="this-week">-</h3>
+                        <p>This Week</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Dashboard Content -->
+        <div class="row" id="dashboard-content">
+            <div class="col-12">
+                <div class="loading">
+                    <i class="fas fa-spinner fa-spin fa-2x mb-3"></i>
+                    <p>Loading dashboard data...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Load dashboard data when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            loadDashboardData();
+            
+            // Auto-refresh every 30 seconds
+            setInterval(loadDashboardData, 30000);
+        });
+
+        function loadDashboardData() {
+            // Show loading state
+            document.getElementById('dashboard-content').innerHTML = `
+                <div class="col-12">
+                    <div class="loading">
+                        <i class="fas fa-spinner fa-spin fa-2x mb-3"></i>
+                        <p>Loading dashboard data...</p>
+                    </div>
+                </div>
+            `;
+
+            // Make AJAX call to get dashboard data
+            fetch('/api/method/qonevo.page.delivery_dashboard.delivery_dashboard.get_context')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.message) {
+                        updateDashboard(data.message);
+                    } else {
+                        showError('Failed to load dashboard data');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading dashboard:', error);
+                    showError('Error loading dashboard data');
+                });
+        }
+
+        function updateDashboard(data) {
+            // Update summary cards
+            document.getElementById('total-orders').textContent = data.total_orders || 0;
+            document.getElementById('total-qty').textContent = data.total_qty || 0;
+            document.getElementById('total-amount').textContent = '₹' + (data.total_amount || 0);
+            document.getElementById('this-week').textContent = data.this_week_count || 0;
+
+            // Update dashboard content
+            let content = `
+                <div class="col-md-4">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0"><i class="fas fa-chart-pie me-2"></i>Priority Distribution</h5>
+                        </div>
+                        <div class="card-body">
+            `;
+
+            // Add priority distribution
+            if (data.priority_data && data.priority_data.length > 0) {
+                data.priority_data.forEach(priority => {
+                    content += `
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="badge bg-${priority.color} priority-badge">${priority.name}</span>
+                                <span class="font-weight-bold fs-5">${priority.count}</span>
+                            </div>
+                        </div>
+                    `;
+                });
+            } else {
+                content += '<p class="text-muted">No priority data available</p>';
+            }
+
+            content += `
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-8">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0"><i class="fas fa-calendar-alt me-2"></i>Delivery Schedule</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>Order</th>
+                                            <th>Customer</th>
+                                            <th>Priority</th>
+                                            <th>Delivery Date</th>
+                                            <th>Status</th>
+                                            <th>Quantity</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+            `;
+
+            // Add delivery data
+            if (data.delivery_data && data.delivery_data.length > 0) {
+                data.delivery_data.forEach(order => {
+                    content += `
+                        <tr>
+                            <td><a href="/app/sales-order/${order.name}" target="_blank" class="text-decoration-none">${order.name}</a></td>
+                            <td>${order.customer}</td>
+                            <td><span class="badge bg-${order.priority_color} priority-badge">${order.priority}</span></td>
+                            <td>${order.delivery_date}</td>
+                            <td><span class="badge bg-${order.status_color}">${order.priority_status}</span></td>
+                            <td>${order.total_qty}</td>
+                        </tr>
+                    `;
+                });
+            } else {
+                content += `
+                    <tr>
+                        <td colspan="6" class="text-center text-muted">No delivery data available for this week</td>
+                    </tr>
+                `;
+            }
+
+            content += `
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('dashboard-content').innerHTML = content;
+        }
+
+        function showError(message) {
+            document.getElementById('dashboard-content').innerHTML = `
+                <div class="col-12">
+                    <div class="alert alert-danger" role="alert">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        ${message}
+                    </div>
+                </div>
+            `;
+        }
+    </script>
+</body>
+</html> 

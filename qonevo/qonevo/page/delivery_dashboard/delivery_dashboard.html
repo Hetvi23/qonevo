@@ -1,0 +1,204 @@
+{% extends "templates/web.html" %}
+
+{% block page_content %}
+<div class="delivery-dashboard">
+    <div class="page-header">
+        <h1 class="page-title">{{ _("Delivery Dashboard") }}</h1>
+        <p class="text-muted">{{ _("Week of") }} {{ delivery_data.week_start.strftime('%B %d, %Y') }} - {{ delivery_data.week_end.strftime('%B %d, %Y') }}</p>
+    </div>
+
+    <!-- Summary Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-body text-center">
+                    <h3 class="text-primary">{{ delivery_data.total_orders }}</h3>
+                    <p class="text-muted">{{ _("Total Orders") }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-body text-center">
+                    <h3 class="text-success">{{ delivery_data.total_qty }}</h3>
+                    <p class="text-muted">{{ _("Total Quantity") }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-body text-center">
+                    <h3 class="text-info">{{ frappe.utils.fmt_money(delivery_data.total_amount) }}</h3>
+                    <p class="text-muted">{{ _("Total Amount") }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-body text-center">
+                    <h3 class="text-warning">{{ priority_data|length }}</h3>
+                    <p class="text-muted">{{ _("Priority Levels") }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Priority Distribution -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5>{{ _("Priority Distribution") }}</h5>
+                </div>
+                <div class="card-body">
+                    <div class="priority-chart">
+                        {% for priority in priority_data %}
+                        <div class="priority-item mb-2">
+                            <div class="d-flex justify-content-between">
+                                <span class="badge badge-{{ 'danger' if priority.priority == 'Urgent' else 'warning' if priority.priority == 'High' else 'info' if priority.priority == 'Medium' else 'secondary' }}">
+                                    {{ priority.priority }}
+                                </span>
+                                <span class="font-weight-bold">{{ priority.count }}</span>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5>{{ _("Priority Status") }}</h5>
+                </div>
+                <div class="card-body">
+                    <div class="priority-status">
+                        <div class="status-item mb-2">
+                            <div class="d-flex justify-content-between">
+                                <span class="badge badge-warning">{{ _("Pending") }}</span>
+                                <span class="font-weight-bold">{{ delivery_data.sales_orders|selectattr('priority_status', 'equalto', 'Pending')|list|length }}</span>
+                            </div>
+                        </div>
+                        <div class="status-item mb-2">
+                            <div class="d-flex justify-content-between">
+                                <span class="badge badge-info">{{ _("In Progress") }}</span>
+                                <span class="font-weight-bold">{{ delivery_data.sales_orders|selectattr('priority_status', 'equalto', 'In Progress')|list|length }}</span>
+                            </div>
+                        </div>
+                        <div class="status-item mb-2">
+                            <div class="d-flex justify-content-between">
+                                <span class="badge badge-success">{{ _("Completed") }}</span>
+                                <span class="font-weight-bold">{{ delivery_data.sales_orders|selectattr('priority_status', 'equalto', 'Completed')|list|length }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delivery Schedule -->
+    <div class="card">
+        <div class="card-header">
+            <h5>{{ _("This Week's Delivery Schedule") }}</h5>
+        </div>
+        <div class="card-body">
+            {% if delivery_data.delivery_by_date %}
+                {% for date, orders in delivery_data.delivery_by_date.items() %}
+                <div class="delivery-day mb-4">
+                    <h6 class="text-primary">{{ date }}</h6>
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>{{ _("Sales Order") }}</th>
+                                    <th>{{ _("Customer") }}</th>
+                                    <th>{{ _("Priority") }}</th>
+                                    <th>{{ _("Quantity") }}</th>
+                                    <th>{{ _("Amount") }}</th>
+                                    <th>{{ _("Priority Status") }}</th>
+                                    <th>{{ _("Delivery Week") }}</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for order in orders %}
+                                <tr>
+                                    <td>
+                                        <a href="/app/sales-order/{{ order.name }}" target="_blank">
+                                            {{ order.name }}
+                                        </a>
+                                    </td>
+                                    <td>{{ order.customer_name }}</td>
+                                    <td>
+                                        <span class="badge badge-{{ 'danger' if order.priority == 'Urgent' else 'warning' if order.priority == 'High' else 'info' if order.priority == 'Medium' else 'secondary' }}">
+                                            {{ order.priority }}
+                                        </span>
+                                    </td>
+                                    <td>{{ order.total_qty }}</td>
+                                    <td>{{ frappe.utils.fmt_money(order.grand_total) }}</td>
+                                    <td>
+                                        <span class="badge badge-{{ 'success' if order.priority_status == 'Completed' else 'info' if order.priority_status == 'In Progress' else 'warning' }}">
+                                            {{ order.priority_status }}
+                                        </span>
+                                    </td>
+                                    <td>{{ order.delivery_week or '' }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="text-center text-muted">
+                    <p>{{ _("No deliveries scheduled for this week") }}</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<style>
+.delivery-dashboard {
+    padding: 20px;
+}
+
+.page-header {
+    margin-bottom: 30px;
+}
+
+.page-title {
+    margin-bottom: 5px;
+}
+
+.card {
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    border: none;
+}
+
+.card-header {
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.priority-item, .status-item {
+    padding: 8px;
+    border-radius: 4px;
+    background-color: #f8f9fa;
+}
+
+.delivery-day {
+    border-left: 4px solid #007bff;
+    padding-left: 15px;
+}
+
+.table th {
+    border-top: none;
+    font-weight: 600;
+}
+
+.badge {
+    font-size: 0.75em;
+}
+</style>
+{% endblock %} 
