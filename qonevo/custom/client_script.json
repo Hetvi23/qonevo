@@ -1,0 +1,18 @@
+[
+	{
+		"apply_to": "Employee",
+		"client_script": "frappe.ui.form.on('Employee', {\n\trefresh: function(frm) {\n\t\t// Add custom button to get suggested salary structure\n\t\tif (frm.doc.ctc && frm.doc.company && frm.doc.salary_currency) {\n\t\t\tfrm.add_custom_button(__('Get Suggested Salary Structure'), function() {\n\t\t\t\tfrm.call('get_suggested_salary_structure').then(r => {\n\t\t\t\t\tif (r.message) {\n\t\t\t\t\t\tfrm.set_value('suggested_salary_structure', r.message.template_name);\n\t\t\t\t\t\tfrappe.msgprint(__('Suggested Salary Structure: {0}', [r.message.template_name]));\n\t\t\t\t\t} else {\n\t\t\t\t\t\tfrappe.msgprint(__('No matching salary structure template found for this CTC.'));\n\t\t\t\t\t}\n\t\t\t\t});\n\t\t\t}, __('CTC Actions'));\n\t\t}\n\t},\n\n\tctc: function(frm) {\n\t\t// Clear suggested salary structure when CTC changes\n\t\tif (frm.doc.ctc) {\n\t\t\tfrm.set_value('suggested_salary_structure', '');\n\t\t}\n\t},\n\n\tcompany: function(frm) {\n\t\t// Clear suggested salary structure when company changes\n\t\tif (frm.doc.company) {\n\t\t\tfrm.set_value('suggested_salary_structure', '');\n\t\t}\n\t},\n\n\tsalary_currency: function(frm) {\n\t\t// Clear suggested salary structure when currency changes\n\t\tif (frm.doc.salary_currency) {\n\t\t\tfrm.set_value('suggested_salary_structure', '');\n\t\t}\n\t},\n\n\tauto_assign_salary_structure: function(frm) {\n\t\t// Show/hide message based on auto assign setting\n\t\tif (frm.doc.auto_assign_salary_structure) {\n\t\t\tfrappe.msgprint(__('Salary structure will be automatically assigned when CTC is saved.'));\n\t\t}\n\t}\n});",
+		"doctype": "Client Script",
+		"enabled": 1,
+		"idx": 0,
+		"modified": "2024-12-19 10:00:00.000000",
+		"name": "Employee CTC Salary Structure",
+		"owner": "Administrator"
+	}
+]
+
+
+
+
+
+

@@ -1,32 +1,16 @@
+# Copyright (c) 2024, Qonevo and Contributors
+# License: GNU General Public License v3. See license.txt
+
+from . import __version__ as app_version
+
 app_name = "qonevo"
-app_title = "Qonevo "
-app_publisher = "Hetvi Patel"
-app_description = "Customisation for Qonevo "
-app_email = "hetvipatel2302@gmail.com"
-app_license = "mit"
-
-# Apps
-# ------------------
-
-# required_apps = []
-
-
-doctype_js = {
-    "Serial No" : "public/js/serial_no.js",
-    "Sales Order" : "public/js/sales_order_priority.js",
-    "Requirement Gathering" : "qonevo/qonevo/doctype/requirement_gathering/requirement_gathering.js",
-    "Requirement Items" : "qonevo/qonevo/doctype/requirement_items/requirement_items.js"
-}
-# Each item in the list will be shown as an app in the apps page
-# add_to_apps_screen = [
-# 	{
-# 		"name": "qonevo",
-# 		"logo": "/assets/qonevo/logo.png",
-# 		"title": "Qonevo ",
-# 		"route": "/qonevo",
-# 		"has_permission": "qonevo.api.permission.has_app_permission"
-# 	}
-# ]
+app_title = "Qonevo"
+app_publisher = "Qonevo"
+app_description = "Custom HR and Payroll enhancements"
+app_icon = "octicon octicon-file-directory"
+app_color = "grey"
+app_email = "admin@qonevo.com"
+app_license = "GNU General Public License v3"
 
 # Includes in <head>
 # ------------------
@@ -34,9 +18,7 @@ doctype_js = {
 # include js, css files in header of desk.html
 # app_include_css = "/assets/qonevo/css/qonevo.css"
 app_include_js = [
-    # Temporarily disabled to fix sidebar issues
-    # "/assets/qonevo/js/helpdesk_vue_override.js",
-    # "/assets/qonevo/js/helpdesk_list_view_override.js"
+    "/assets/qonevo/js/clean_barcode_scanner.js"
 ]
 
 # include js, css files in header of web template
@@ -53,24 +35,14 @@ app_include_js = [
 # include js in page
 # page_js = {"page" : "public/js/file.js"}
 
-# Pages
-# ------------------
-page_js = {
-    "delivery-dashboard": "qonevo/page/delivery_dashboard/delivery_dashboard.js"
-}
-
-
-
 # include js in doctype views
-# doctype_js = {"doctype" : "public/js/doctype.js"}
+doctype_js = {
+    "Delivery Note" : "qonevo/doctype/delivery_note/delivery_note.js",
+    "Purchase Receipt" : "qonevo/doctype/purchase_receipt/purchase_receipt.js"
+}
 # doctype_list_js = {"doctype" : "public/js/doctype_list.js"}
 # doctype_tree_js = {"doctype" : "public/js/doctype_tree.js"}
 # doctype_calendar_js = {"doctype" : "public/js/doctype_calendar.js"}
-
-# Svg Icons
-# ------------------
-# include app icons in desk
-# app_include_icons = "qonevo/public/icons.svg"
 
 # Home Pages
 # ----------
@@ -80,7 +52,7 @@ page_js = {
 
 # website user home page (by Role)
 # role_home_page = {
-# 	"Role": "home_page"
+#	"Role": "home_page"
 # }
 
 # Generators
@@ -94,37 +66,21 @@ page_js = {
 
 # add methods and filters to jinja environment
 # jinja = {
-# 	"methods": "qonevo.utils.jinja_methods",
-# 	"filters": "qonevo.utils.jinja_filters"
+#	"methods": "qonevo.utils.jinja_methods",
+#	"filters": "qonevo.utils.jinja_filters"
 # }
 
 # Installation
 # ------------
 
 # before_install = "qonevo.install.before_install"
-# after_install = "qonevo.install.after_install"
+after_install = "qonevo.install.after_install"
 
 # Uninstallation
 # ------------
 
 # before_uninstall = "qonevo.uninstall.before_uninstall"
 # after_uninstall = "qonevo.uninstall.after_uninstall"
-
-# Integration Setup
-# ------------------
-# To set up dependencies/integrations with other apps
-# Name of the app being installed is passed as an argument
-
-# before_app_install = "qonevo.utils.before_app_install"
-# after_app_install = "qonevo.utils.after_app_install"
-
-# Integration Cleanup
-# -------------------
-# To clean up dependencies/integrations with other apps
-# Name of the app being uninstalled is passed as an argument
-
-# before_app_uninstall = "qonevo.utils.before_app_uninstall"
-# after_app_uninstall = "qonevo.utils.after_app_uninstall"
 
 # Desk Notifications
 # ------------------
@@ -137,53 +93,56 @@ page_js = {
 # Permissions evaluated in scripted ways
 
 # permission_query_conditions = {
-# 	"Event": "frappe.desk.doctype.event.event.get_permission_query_conditions",
+#	"Event": "frappe.desk.doctype.event.event.get_permission_query_conditions",
 # }
 #
 # has_permission = {
-# 	"Event": "frappe.desk.doctype.event.event.has_permission",
+#	"Event": "frappe.desk.doctype.event.event.has_permission",
 # }
 
 # DocType Class
 # ---------------
 # Override standard doctype classes
 
-override_doctype_class = {
-	"Sales Order": "qonevo.overrides.sales_order.QonevoSalesOrder"
-}
+# override_doctype_class = {
+#	"Employee": "qonevo.qonevo.doctype.employee.employee.Employee"
+# }
 
 # Document Events
 # ---------------
 # Hook on document methods and events
 
 doc_events = {
-    "Sales Order": {
-        "after_submit" : "qonevo.overrides.sales_order.after_submit"
-    },
-    "Serial No":{
-        "before_insert": "qonevo.overrides.serial_no_handlers.set_model_and_size"
-    }
+	"Employee": {
+		"validate": "qonevo.qonevo.doctype.employee.employee.validate_ctc_salary_structure"
+	},
+	"Serial No": {
+		"after_insert": "qonevo.serial_no_after_insert.after_insert",
+		"on_update": "qonevo.serial_number_handlers.on_update",
+		"after_update": "qonevo.serial_number_handlers.after_update",
+		"before_save": "qonevo.serial_number_handlers.before_save"
+	}
 }
 
 # Scheduled Tasks
 # ---------------
 
 # scheduler_events = {
-# 	"all": [
-# 		"qonevo.tasks.all"
-# 	],
-# 	"daily": [
-# 		"qonevo.tasks.daily"
-# 	],
-# 	"hourly": [
-# 		"qonevo.tasks.hourly"
-# 	],
-# 	"weekly": [
-# 		"qonevo.tasks.weekly"
-# 	],
-# 	"monthly": [
-# 		"qonevo.tasks.monthly"
-# 	],
+#	"all": [
+#		"qonevo.tasks.all"
+#	],
+#	"daily": [
+#		"qonevo.tasks.daily"
+#	],
+#	"hourly": [
+#		"qonevo.tasks.hourly"
+#	],
+#	"weekly": [
+#		"qonevo.tasks.weekly"
+#	]
+#	"monthly": [
+#		"qonevo.tasks.monthly"
+#	]
 # }
 
 # Testing
@@ -191,80 +150,60 @@ doc_events = {
 
 # before_tests = "qonevo.install.before_tests"
 
-# Whitelisted Methods
+# Overriding Methods
 # ------------------------------
 #
-whitelisted_methods = [
-    "qonevo.api.get_status_counts",
-    "qonevo.api.get_list_data",
-    "qonevo.api.get_filterable_fields",
-    "qonevo.api.get_quick_filters"
-]
+# override_whitelisted_methods = {
+#	"frappe.desk.doctype.event.event.get_events": "qonevo.event.get_events"
+# }
 #
 # each overriding function accepts a `data` argument;
 # generated from the base implementation of the doctype dashboard,
 # along with any modifications made in other Frappe apps
 # override_doctype_dashboards = {
-# 	"Task": "qonevo.task.get_dashboard_data"
+#	"Task": "qonevo.task.get_dashboard_data"
 # }
 
 # exempt linked doctypes from being automatically cancelled
 #
 # auto_cancel_exempted_doctypes = ["Auto Repeat"]
 
-# Ignore links to specified DocTypes when deleting documents
-# -----------------------------------------------------------
-
-# ignore_links_on_delete = ["Communication", "ToDo"]
-
-# Request Events
-# ----------------
-# before_request = ["qonevo.utils.before_request"]
-# after_request = ["qonevo.utils.after_request"]
-
-# Job Events
-# ----------
-# before_job = ["qonevo.utils.before_job"]
-# after_job = ["qonevo.utils.after_job"]
 
 # User Data Protection
 # --------------------
 
 # user_data_fields = [
-# 	{
-# 		"doctype": "{doctype_1}",
-# 		"filter_by": "{filter_by}",
-# 		"redact_fields": ["{field_1}", "{field_2}"],
-# 		"partial": 1,
-# 	},
-# 	{
-# 		"doctype": "{doctype_2}",
-# 		"filter_by": "{filter_by}",
-# 		"partial": 1,
-# 	},
-# 	{
-# 		"doctype": "{doctype_3}",
-# 		"strict": False,
-# 	},
-# 	{
-# 		"doctype": "{doctype_4}"
-# 	}
+#	{
+#		"doctype": "{doctype_1}",
+#		"filter_by": "{filter_by}",
+#		"redact_fields": ["{field_1}", "{field_2}"],
+#		"partial": 1,
+#	},
+#	{
+#		"doctype": "{doctype_2}",
+#		"filter_by": "{filter_by}",
+#		"partial": 1,
+#	},
+#	{
+#		"doctype": "{doctype_3}",
+#		"strict": False,
+#	},
+#	{
+#		"doctype": "{doctype_4}"
+#	}
 # ]
 
 # Authentication and authorization
 # --------------------------------
 
 # auth_hooks = [
-# 	"qonevo.auth.validate"
+#	"qonevo.auth.validate"
 # ]
 
-# Automatically update python controller files with type annotations for this app.
-# export_python_type_annotations = True
+# Translation
+# --------------------------------
 
-# default_log_clearing_doctypes = {
-# 	"Logging DocType Name": 30  # days to retain logs
-# }
-
-
-# Temporarily disabled fixtures to fix installation
-fixtures = []
+# Make link fields search translated document names for these DocTypes
+# Recommended only for DocTypes which have limited documents with untranslated names
+# For example: Role, Gender, etc.
+# translated_search_doctypes = []

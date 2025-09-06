@@ -27,6 +27,8 @@ def get_status_counts():
 def get_list_data(doctype="HD Ticket", filters=None, **kwargs):
     """Get list data with custom filters and OR logic - Direct API endpoint"""
     try:
+        print(f"QONEVO API: Received doctype={doctype}, filters={filters}, kwargs={kwargs}")
+        
         # Handle filters parameter
         if isinstance(filters, str):
             if not filters or filters.strip() == "":
@@ -38,6 +40,24 @@ def get_list_data(doctype="HD Ticket", filters=None, **kwargs):
                     filters = []
         elif filters is None:
             filters = []
+        
+        # Convert dictionary filters to list format if needed
+        if isinstance(filters, dict):
+            filter_list = []
+            for key, value in filters.items():
+                if isinstance(value, list) and len(value) >= 2:
+                    # Already in list format like ['>=', '2023-01-01'] or ['between', [date1, date2]]
+                    filter_list.append([key] + value)
+                elif isinstance(value, list) and len(value) == 1:
+                    # Single value in list like ['Open']
+                    filter_list.append([key, "=", value[0]])
+                elif isinstance(value, list) and len(value) > 1:
+                    # Multiple values like ['Open', 'Closed'] - use 'in' operator
+                    filter_list.append([key, "in", value])
+                else:
+                    # Simple value like 'Open'
+                    filter_list.append([key, "=", value])
+            filters = filter_list
         
         # Ensure filters is a list
         if not isinstance(filters, list):
@@ -53,7 +73,6 @@ def get_list_data(doctype="HD Ticket", filters=None, **kwargs):
         return call_original_get_list_data(doctype, filters, **kwargs)
         
     except Exception as e:
-        frappe.log_error(f"Error in qonevo get_list_data: {str(e)}")
         return call_original_get_list_data(doctype, filters, **kwargs)
 
 @frappe.whitelist()
@@ -156,7 +175,56 @@ def call_original_get_list_data(doctype, filters, **kwargs):
     try:
         # Import the original method
         from helpdesk.api.doc import get_list_data as original_get_list_data
-        return original_get_list_data(doctype, filters, **kwargs)
+        
+        # Convert list format filters to dict format for the original API
+        if isinstance(filters, list):
+            filter_dict = {}
+            for filter_item in filters:
+                if isinstance(filter_item, list) and len(filter_item) >= 3:
+                    field, operator, value = filter_item[0], filter_item[1], filter_item[2]
+                    if operator == "=":
+                        filter_dict[field] = value
+                    elif operator == "in":
+                        filter_dict[field] = ["in", value]
+                    elif operator == "like":
+                        filter_dict[field] = ["like", value]
+                    elif operator == ">=":
+                        filter_dict[field] = [">=", value]
+                    elif operator == "<=":
+                        filter_dict[field] = ["<=", value]
+                    elif operator == "between":
+                        filter_dict[field] = ["between", value]
+                    elif operator == ">":
+                        filter_dict[field] = [">", value]
+                    elif operator == "<":
+                        filter_dict[field] = ["<", value]
+            filters = filter_dict
+        
+        # Filter out parameters that the original function doesn't expect
+        filtered_kwargs = {}
+        allowed_params = ['default_filters', 'order_by', 'page_length', 'columns', 'rows', 
+                         'show_customer_portal_fields', 'view', 'is_default']
+        
+        for key, value in kwargs.items():
+            if key in allowed_params:
+                # Special handling for columns parameter
+                if key == 'columns' and isinstance(value, list):
+                    # Ensure columns are in the correct format
+                    formatted_columns = []
+                    for col in value:
+                        if isinstance(col, str):
+                            # Convert string to object format
+                            formatted_columns.append({"key": col, "label": col.title()})
+                        elif isinstance(col, dict) and 'key' in col:
+                            # Already in correct format
+                            formatted_columns.append(col)
+                    filtered_kwargs[key] = formatted_columns
+                else:
+                    filtered_kwargs[key] = value
+        
+        result = original_get_list_data(doctype, filters, **filtered_kwargs)
+        print(f"QONEVO API: Original API returned {len(result.get('data', []))} tickets")
+        return result
     except ImportError:
         # Fallback if original method is not available
         frappe.log_error("Original helpdesk get_list_data method not found")
@@ -183,20 +251,21 @@ def get_ticket_history(ticket_no):
 
     history = []
     logs = frappe.get_all(
-        "hd_ticket_activity",
-        filters={"parent": ticket_no},
-        fields=["status", "owner", "creation"],
+        "HD Ticket Activity",
+        filters={"ticket": ticket_no},
+        fields=["action", "owner", "creation"],
         order_by="creation asc"
     )
     for log in logs:
         history.append({
-            "state": log.status,
+            "state": log.action,
             "action_by": log.owner,
             "time": log.creation
         })
 
     if not history:
-        frappe.throw(f"No history found for Ticket: {ticket_no}")
+        # Return empty list instead of throwing error
+        return []
 
     return history
 

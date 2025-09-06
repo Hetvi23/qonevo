@@ -1,0 +1,21 @@
+[
+	{
+		"doctype": "Custom Field",
+		"filters": [
+			["dt", "=", "Employee"],
+			["fieldname", "in", ["ctc_salary_structure_section", "suggested_salary_structure", "auto_assign_salary_structure"]]
+		]
+	},
+	{
+		"doctype": "Client Script",
+		"filters": [
+			["name", "=", "Employee CTC Salary Structure"]
+		]
+	}
+]
+
+
+
+
+
+

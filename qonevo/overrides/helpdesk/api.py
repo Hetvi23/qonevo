@@ -41,6 +41,24 @@ def get_list_data(filters=None, **kwargs):
         elif filters is None:
             filters = []
         
+        # Convert dictionary filters to list format if needed
+        if isinstance(filters, dict):
+            filter_list = []
+            for key, value in filters.items():
+                if isinstance(value, list) and len(value) >= 2:
+                    # Already in list format like ['>=', '2023-01-01']
+                    filter_list.append([key] + value)
+                elif isinstance(value, list) and len(value) == 1:
+                    # Single value in list like ['Open']
+                    filter_list.append([key, "=", value[0]])
+                elif isinstance(value, list) and len(value) > 1:
+                    # Multiple values like ['Open', 'Closed'] - use 'in' operator
+                    filter_list.append([key, "in", value])
+                else:
+                    # Simple value like 'Open'
+                    filter_list.append([key, "=", value])
+            filters = filter_list
+        
         # Ensure filters is a list
         if not isinstance(filters, list):
             filters = []
@@ -102,6 +120,31 @@ def call_original_get_list_data(filters, **kwargs):
     try:
         # Import the original method
         from helpdesk.api.doc import get_list_data as original_get_list_data
+        
+        # Convert list format filters to dict format for the original API
+        if isinstance(filters, list):
+            filter_dict = {}
+            for filter_item in filters:
+                if isinstance(filter_item, list) and len(filter_item) >= 3:
+                    field, operator, value = filter_item[0], filter_item[1], filter_item[2]
+                    if operator == "=":
+                        filter_dict[field] = value
+                    elif operator == "in":
+                        filter_dict[field] = ["in", value]
+                    elif operator == "like":
+                        filter_dict[field] = ["like", value]
+                    elif operator == ">=":
+                        filter_dict[field] = [">=", value]
+                    elif operator == "<=":
+                        filter_dict[field] = ["<=", value]
+                    elif operator == "between":
+                        filter_dict[field] = ["between", value]
+                    elif operator == ">":
+                        filter_dict[field] = [">", value]
+                    elif operator == "<":
+                        filter_dict[field] = ["<", value]
+            filters = filter_dict
+        
         return original_get_list_data(filters, **kwargs)
     except ImportError:
         # Fallback if original method is not available

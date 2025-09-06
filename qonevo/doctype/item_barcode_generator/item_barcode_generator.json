@@ -1,0 +1,163 @@
+{
+ "actions": [],
+ "allow_import": 1,
+ "allow_rename": 1,
+ "autoname": "field:title",
+ "creation": "2025-01-27 10:00:00",
+ "description": "Generate and manage barcodes for items with model numbers",
+ "doctype": "DocType",
+ "document_type": "Document",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+   "field_order": [
+  "title",
+  "item_code",
+  "model_number",
+  "serial_number",
+  "barcode_type",
+  "section_break_4",
+  "barcode_string",
+  "barcode_image",
+  "section_break_6",
+  "item_details",
+  "item_name",
+  "item_group",
+  "stock_uom",
+  "description",
+  "brand",
+  "standard_rate"
+ ],
+ "fields": [
+  {
+   "fieldname": "title",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Title",
+   "reqd": 1
+  },
+  {
+   "fieldname": "item_code",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Item Code",
+   "options": "Item",
+   "reqd": 1
+  },
+  {
+   "fieldname": "model_number",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Model Number",
+   "description": "Manufacturer part number or model number"
+  },
+  {
+   "fieldname": "serial_number",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Serial Number",
+   "description": "Serial number of the specific item instance"
+  },
+  {
+   "fieldname": "barcode_type",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Barcode Type",
+   "options": "CODE128\nCODE39\nEAN13\nEAN8\nUPC\nQRCODE",
+   "reqd": 1
+  },
+  {
+   "fieldname": "section_break_4",
+   "fieldtype": "Section Break",
+   "label": "Barcode Details"
+  },
+  {
+   "fieldname": "barcode_string",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Barcode String",
+   "read_only": 1
+  },
+  {
+   "fieldname": "barcode_image",
+   "fieldtype": "HTML",
+   "label": "Barcode Image",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_break_6",
+   "fieldtype": "Section Break",
+   "label": "Item Details"
+  },
+  {
+   "fieldname": "item_details",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "item_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Item Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "item_group",
+   "fieldtype": "Link",
+   "label": "Item Group",
+   "options": "Item Group",
+   "read_only": 1
+  },
+  {
+   "fieldname": "stock_uom",
+   "fieldtype": "Link",
+   "label": "Stock UOM",
+   "options": "UOM",
+   "read_only": 1
+  },
+  {
+   "fieldname": "description",
+   "fieldtype": "Text",
+   "label": "Description",
+   "read_only": 1
+  },
+  {
+   "fieldname": "brand",
+   "fieldtype": "Link",
+   "label": "Brand",
+   "options": "Brand",
+   "read_only": 1
+  },
+  {
+   "fieldname": "standard_rate",
+   "fieldtype": "Currency",
+   "label": "Standard Rate",
+   "read_only": 1
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "istable": 0,
+ "links": [],
+ "modified": "2025-01-27 10:00:00",
+ "modified_by": "Administrator",
+ "module": "Qonevo",
+ "name": "Item Barcode Generator",
+ "naming_rule": "By fieldname",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

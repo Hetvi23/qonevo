@@ -1,0 +1,220 @@
+<!-- Copyright (c) 2025, Qonevo and contributors -->
+<!-- For license information, please see license.txt -->
+
+{% extends "templates/web.html" %}
+
+{% block page_content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="page-header">
+                <h1 class="page-title">{{ _("Barcode Manager") }}</h1>
+                <p class="text-muted">{{ _("Generate and manage barcodes for items with model numbers") }}</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-body text-center">
+                    <h3 class="text-primary">{{ stats.total_items }}</h3>
+                    <p class="text-muted">{{ _("Total Items") }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-body text-center">
+                    <h3 class="text-success">{{ stats.items_with_barcodes }}</h3>
+                    <p class="text-muted">{{ _("Items with Barcodes") }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-body text-center">
+                    <h3 class="text-info">{{ stats.total_items - stats.items_with_barcodes }}</h3>
+                    <p class="text-muted">{{ _("Items without Barcodes") }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-body text-center">
+                    <h3 class="text-warning">{{ "%.1f"|format((stats.items_with_barcodes / stats.total_items * 100) if stats.total_items > 0 else 0) }}%</h3>
+                    <p class="text-muted">{{ _("Coverage") }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="btn-group" role="group">
+                <a href="/app/item-barcode-generator/new" class="btn btn-primary">
+                    <i class="fa fa-plus"></i> {{ _("Generate New Barcode") }}
+                </a>
+                <button class="btn btn-success" onclick="bulkGenerateBarcodes()">
+                    <i class="fa fa-barcode"></i> {{ _("Bulk Generate") }}
+                </button>
+                <button class="btn btn-info" onclick="scanBarcode()">
+                    <i class="fa fa-qrcode"></i> {{ _("Scan Barcode") }}
+                </button>
+                <a href="/app/item-barcode-generator" class="btn btn-secondary">
+                    <i class="fa fa-list"></i> {{ _("View All Barcodes") }}
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Recent Barcodes -->
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title">{{ _("Recent Barcodes") }}</h5>
+                </div>
+                <div class="card-body">
+                    {% if recent_barcodes %}
+                        <div class="list-group">
+                            {% for barcode in recent_barcodes %}
+                            <div class="list-group-item">
+                                <div class="d-flex w-100 justify-content-between">
+                                    <h6 class="mb-1">{{ barcode.item_code }}</h6>
+                                    <small>{{ frappe.format(barcode.creation, {'fieldtype': 'Datetime'}) }}</small>
+                                </div>
+                                <p class="mb-1">{{ barcode.item_name }}</p>
+                                <small class="text-muted">
+                                    {{ _("Model") }}: {{ barcode.model_number or "N/A" }} | 
+                                    {{ _("Type") }}: {{ barcode.barcode_type }}
+                                </small>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p class="text-muted">{{ _("No barcodes generated yet") }}</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Items without Barcodes -->
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title">{{ _("Items without Barcodes") }}</h5>
+                </div>
+                <div class="card-body">
+                    {% if items_without_barcodes %}
+                        <div class="list-group">
+                            {% for item in items_without_barcodes %}
+                            <div class="list-group-item">
+                                <div class="d-flex w-100 justify-content-between">
+                                    <h6 class="mb-1">{{ item.name }}</h6>
+                                    <button class="btn btn-sm btn-primary" onclick="generateBarcodeForItem('{{ item.name }}')">
+                                        {{ _("Generate") }}
+                                    </button>
+                                </div>
+                                <p class="mb-1">{{ item.item_name }}</p>
+                                <small class="text-muted">
+                                    {{ _("Model") }}: {{ item.default_manufacturer_part_no or "N/A" }}
+                                </small>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p class="text-success">{{ _("All items have barcodes!") }}</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Barcode Type Distribution -->
+    {% if stats.barcode_types %}
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title">{{ _("Barcode Type Distribution") }}</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        {% for type_stat in stats.barcode_types %}
+                        <div class="col-md-2">
+                            <div class="text-center">
+                                <h4 class="text-primary">{{ type_stat.count }}</h4>
+                                <p class="text-muted">{{ type_stat.barcode_type }}</p>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<script>
+function generateBarcodeForItem(itemCode) {
+    frappe.new_doc('Item Barcode Generator', {
+        item_code: itemCode
+    });
+}
+
+function bulkGenerateBarcodes() {
+    frappe.prompt({
+        fieldname: 'item_codes',
+        fieldtype: 'Text',
+        label: 'Item Codes',
+        description: 'Enter item codes separated by commas',
+        reqd: 1
+    }, function(values) {
+        let itemCodes = values.item_codes.split(',').map(code => code.trim());
+        frappe.call({
+            method: 'qonevo.barcode_utils.generate_bulk_barcodes',
+            args: {
+                item_codes: itemCodes,
+                barcode_type: 'CODE128'
+            },
+            callback: function(r) {
+                if (r.message) {
+                    frappe.msgprint('Bulk barcode generation completed');
+                    location.reload();
+                }
+            }
+        });
+    });
+}
+
+function scanBarcode() {
+    frappe.prompt({
+        fieldname: 'barcode',
+        fieldtype: 'Data',
+        label: 'Scan or Enter Barcode',
+        reqd: 1
+    }, function(values) {
+        frappe.call({
+            method: 'qonevo.barcode_utils.scan_item_barcode',
+            args: {
+                barcode_string: values.barcode
+            },
+            callback: function(r) {
+                if (r.message && r.message.success) {
+                    frappe.msgprint({
+                        title: 'Barcode Scanned',
+                        message: `Item: ${r.message.item_code} - ${r.message.item_name}<br>Model: ${r.message.model_number || 'N/A'}`
+                    });
+                } else {
+                    frappe.msgprint('Item not found for this barcode');
+                }
+            }
+        });
+    });
+}
+</script>
+{% endblock %}
