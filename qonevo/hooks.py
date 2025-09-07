@@ -21,6 +21,12 @@ app_include_js = [
     "/assets/qonevo/js/clean_barcode_scanner.js"
 ]
 
+
+fixtures = [
+    "Custom Field",
+	"Property Setter"
+]
+
 # include js, css files in header of web template
 # web_include_css = "/assets/qonevo/css/qonevo.css"
 # web_include_js = "/assets/qonevo/js/qonevo.js"
