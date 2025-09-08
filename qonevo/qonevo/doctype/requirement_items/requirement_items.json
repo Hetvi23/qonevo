@@ -10,6 +10,8 @@
   "item_name",
   "qty",
   "rate",
+  "gst",
+  "gst_amount",
   "amount",
   "select_ircl"
  ],
@@ -52,13 +54,24 @@
    "in_list_view": 1,
    "label": "Status",
    "options": "Pending\nApproved\nReject"
+  },
+  {
+   "fieldname": "gst",
+   "fieldtype": "Float",
+   "label": "GST %"
+  },
+  {
+   "fieldname": "gst_amount",
+   "fieldtype": "Float",
+   "label": "GST Amount",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-08-06 00:45:18.490238",
+ "modified": "2025-09-08 10:48:06.248475",
  "modified_by": "Administrator",
  "module": "Qonevo",
  "name": "Requirement Items",
