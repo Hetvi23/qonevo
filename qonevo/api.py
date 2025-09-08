@@ -450,10 +450,11 @@ def get_dashboard_data(from_date=None, to_date=None):
         filters = {"docstatus": 1}
         if from_date and to_date:
             filters["delivery_date"] = ["between", [from_date, to_date]]
+        
         orders = frappe.get_all(
             "Sales Order",
             filters=filters,
-            fields=["name", "customer", "priority", "priority_status", "delivery_date", "grand_total"],
+            fields=["name", "customer", "custom_priority", "delivery_date", "grand_total"],
             limit=100
         )
         delivery_data = []
@@ -479,11 +480,11 @@ def get_dashboard_data(from_date=None, to_date=None):
             delivery_data.append({
                 "name": order.name,
                 "customer": order.customer or "N/A",
-                "priority": order.priority or "Medium",
-                "priority_color": priority_colors.get(order.priority, "medium"),
+                "priority": order.custom_priority or "Medium",
+                "priority_color": priority_colors.get(order.custom_priority, "medium"),
                 "delivery_date": order.delivery_date.strftime("%d-%m-%Y") if order.delivery_date else "",
-                "priority_status": order.priority_status or "Pending",
-                "status_color": status_colors.get(order.priority_status, "pending"),
+                "priority_status": "Pending",  # Default status since field doesn't exist
+                "status_color": "pending",  # Default color
                 "total_qty": qty,
                 "grand_total": order.grand_total or 0
             })

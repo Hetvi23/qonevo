@@ -44,7 +44,7 @@ def get_delivery_data():
             "docstatus": 1,  # Submitted orders
             "delivery_date": ["between", [start_of_week, next_week_end]]
         },
-        fields=["name", "customer", "priority", "priority_status", "delivery_date", "delivery_week", "grand_total"],
+        fields=["name", "customer", "custom_priority", "delivery_date", "delivery_week", "grand_total"],
         order_by="delivery_date"
     )
     
@@ -76,11 +76,11 @@ def get_delivery_data():
         delivery_data.append({
             "name": order.name,
             "customer": order.customer,
-            "priority": order.priority or "Medium",
-            "priority_color": priority_colors.get(order.priority, "medium"),
+            "priority": order.custom_priority or "Medium",
+            "priority_color": priority_colors.get(order.custom_priority, "medium"),
             "delivery_date": order.delivery_date.strftime("%d-%m-%Y") if order.delivery_date else "",
-            "priority_status": order.priority_status or "Pending",
-            "status_color": status_colors.get(order.priority_status, "pending"),
+            "priority_status": "Pending",  # Default status since field doesn't exist
+            "status_color": "pending",  # Default color
             "total_qty": qty,
             "grand_total": order.grand_total or 0
         })
@@ -95,7 +95,7 @@ def get_priority_data():
     for priority in priorities:
         count = frappe.db.count("Sales Order", {
             "docstatus": 1,
-            "priority": priority
+            "custom_priority": priority
         })
         
         colors = {
