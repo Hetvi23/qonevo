@@ -9,7 +9,21 @@ from frappe.utils import nowdate
 
 class RequirementGathering(Document):
     def validate(self):
+        self.calculate_gst_amounts()
         self.set_status()
+    
+    def calculate_gst_amounts(self):
+        """Calculate GST amounts for all requirement items"""
+        for item in self.requirement_item:
+            if item.qty and item.rate:
+                base_amount = item.qty * item.rate
+                gst_percentage = float(item.gst) if item.gst else 0
+                gst_amount = (base_amount * gst_percentage) / 100
+                item.gst_amount = gst_amount
+                item.amount = base_amount + gst_amount
+            else:
+                item.gst_amount = 0
+                item.amount = 0
     
     def set_status(self):
         """Set status based on child items"""
@@ -150,6 +164,10 @@ def create_purchase_order(docname):
     """Create Purchase Order from approved items"""
     doc = frappe.get_doc("Requirement Gathering", docname)
     
+    # Recalculate GST amounts before creating PO
+    doc.calculate_gst_amounts()
+    doc.save()
+    
     # Check if any items are approved
     approved_items = [item for item in doc.requirement_item if item.select_ircl == "Approved"]
     
@@ -211,6 +229,9 @@ def create_purchase_order(docname):
     
     # Add items
     for item in approved_items:
+        # Debug: Log the values being used
+        frappe.logger().info(f"Item: {item.item_code}, Qty: {item.qty}, Rate: {item.rate}, GST: {item.gst}, Amount: {item.amount}")
+        
         po.append("items", {
             "item_code": item.item_code,
             "item_name": item.item_name,
@@ -221,15 +242,18 @@ def create_purchase_order(docname):
             "warehouse": default_warehouse
         })
     
+    # Set status to Draft instead of submitting
+    po.status = "Draft"
     po.insert()
-    po.submit()
+    # Don't submit - keep as draft
+    # po.submit()
     
     # Update Requirement Gathering
     doc.purchase_order_ref = po.name
     doc.status = "PO Created"
     doc.save()
     
-    frappe.msgprint(_("Purchase Order {0} created successfully").format(po.name))
+    frappe.msgprint(_("Purchase Order {0} created successfully as Draft").format(po.name))
     return {"status": "success", "purchase_order": po.name}
 
 @frappe.whitelist()
@@ -375,15 +399,23 @@ def create_purchase_receipt_from_po(po_name, items, remarks=None):
     # Add items
     for item in items:
         if float(item.get("received_qty", 0)) > 0:
+            # Get the Purchase Order Item details
+            po_item = frappe.db.get_value("Purchase Order Item", 
+                {"parent": po_name, "item_code": item.get("item_code")}, 
+                ["name", "rate", "warehouse"], as_dict=True)
+            
+            if not po_item:
+                frappe.throw(_("Item {0} not found in Purchase Order {1}").format(item.get("item_code"), po_name))
+            
             pr.append("items", {
                 "item_code": item.get("item_code"),
                 "item_name": frappe.db.get_value("Item", item.get("item_code"), "item_name"),
                 "uom": frappe.db.get_value("Item", item.get("item_code"), "stock_uom"),
                 "qty": float(item.get("received_qty")),
-                "rate": frappe.db.get_value("Purchase Order Item", 
-                    {"parent": po_name, "item_code": item.get("item_code")}, "rate"),
-                "warehouse": frappe.db.get_value("Purchase Order Item", 
-                    {"parent": po_name, "item_code": item.get("item_code")}, "warehouse")
+                "rate": po_item.rate,
+                "warehouse": po_item.warehouse,
+                "purchase_order": po_name,
+                "purchase_order_item": po_item.name  # This is the crucial link!
             })
 
     if not pr.items:
@@ -447,10 +479,22 @@ def create_purchase_receipt_from_po_new(po_name, items):
     pr.purchase_order = po_name
 
     for item in items:
+        # Get the Purchase Order Item details
+        po_item = frappe.db.get_value("Purchase Order Item", 
+            {"parent": po_name, "item_code": item.get("item_code")}, 
+            ["name", "rate", "warehouse"], as_dict=True)
+        
+        if not po_item:
+            frappe.throw(_("Item {0} not found in Purchase Order {1}").format(item.get("item_code"), po_name))
+        
         pr.append("items", {
             "item_code": item.get("item_code"),
             "qty": item.get("received_qty", 0),
             "received_qty": item.get("received_qty", 0),
+            "rate": po_item.rate,
+            "warehouse": po_item.warehouse,
+            "purchase_order": po_name,
+            "purchase_order_item": po_item.name,  # This is the crucial link!
             "serial_no": item.get("serial_no", ""),  # Pass string like 'SN001,SN002'
             "schedule_date": nowdate()
         })

@@ -92,6 +92,16 @@ frappe.ui.form.on('Requirement Items', {
     
     rate: function(frm, cdt, cdn) {
         calculateRowAmount(frm, cdt, cdn);
+    },
+    
+    gst: function(frm, cdt, cdn) {
+        let row = locals[cdt][cdn];
+        // Validate GST percentage (should be between 0 and 100)
+        if (row.gst && (row.gst < 0 || row.gst > 100)) {
+            frappe.msgprint(__('GST percentage should be between 0 and 100'));
+            row.gst = 0;
+        }
+        calculateRowAmount(frm, cdt, cdn);
     }
 });
 
@@ -216,7 +226,7 @@ function fetchItemDetails(frm, cdt, cdn) {
                                     row.rate = item.standard_rate || 0;
                                 }
                                 
-                                // Calculate amount
+                                // Calculate amount (including GST)
                                 calculateRowAmount(frm, cdt, cdn);
                                 frm.refresh_field('requirement_item');
                             }
@@ -246,8 +256,13 @@ function fetchItemDetails(frm, cdt, cdn) {
 function calculateRowAmount(frm, cdt, cdn) {
     let row = locals[cdt][cdn];
     if (row.qty && row.rate) {
-        row.amount = row.qty * row.rate;
+        let base_amount = row.qty * row.rate;
+        let gst_percentage = parseFloat(row.gst) || 0;
+        let gst_amount = (base_amount * gst_percentage) / 100;
+        row.gst_amount = gst_amount;
+        row.amount = base_amount + gst_amount;
     } else {
+        row.gst_amount = 0;
         row.amount = 0;
     }
     frm.refresh_field('requirement_item');
@@ -307,19 +322,22 @@ function rejectAllItems(frm) {
 
 function createPurchaseOrder(frm) {
     frappe.confirm(__('Are you sure you want to create a Purchase Order?'), function() {
-        frappe.call({
-            method: 'qonevo.qonevo.doctype.requirement_gathering.requirement_gathering.create_purchase_order',
-            args: {
-                docname: frm.doc.name
-            },
-            callback: function(r) {
-                if (r.exc) {
-                    frappe.msgprint(__('Error: ') + r.exc);
-                } else {
-                    frm.reload_doc();
-                    frappe.show_alert(__('Purchase Order created successfully'), 3);
+        // Save the document first to ensure GST calculations are saved
+        frm.save().then(function() {
+            frappe.call({
+                method: 'qonevo.qonevo.doctype.requirement_gathering.requirement_gathering.create_purchase_order',
+                args: {
+                    docname: frm.doc.name
+                },
+                callback: function(r) {
+                    if (r.exc) {
+                        frappe.msgprint(__('Error: ') + r.exc);
+                    } else {
+                        frm.reload_doc();
+                        frappe.show_alert(__('Purchase Order created successfully as Draft'), 3);
+                    }
                 }
-            }
+            });
         });
     });
 }

@@ -75,13 +75,15 @@
    "fieldname": "purchase_order_ref",
    "fieldtype": "Link",
    "label": "\tPurchase Order Ref",
-   "options": "Purchase Order"
+   "options": "Purchase Order",
+   "read_only": 1
   },
   {
    "fieldname": "purchase_receipt_ref",
    "fieldtype": "Link",
    "label": "Purchase Receipt Ref",
-   "options": "Purchase Receipt"
+   "options": "Purchase Receipt",
+   "read_only": 1
   },
   {
    "fieldname": "requirement_item",
@@ -93,7 +95,7 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-08-06 08:40:51.569485",
+ "modified": "2025-09-08 10:47:51.459643",
  "modified_by": "Administrator",
  "module": "Qonevo",
  "name": "Requirement Gathering",
