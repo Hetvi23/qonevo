@@ -1,0 +1,179 @@
+[
+ {
+  "allow_edit": "Installer",
+  "doc_status": "0",
+  "doc_type": "Installation Job",
+  "docstatus": 0,
+  "doctype": "Workflow",
+  "is_active": 1,
+  "modified": "2025-01-27 10:00:00.000000",
+  "name": "Installation Job Workflow",
+  "send_email_alert": 0,
+  "states": [
+   {
+    "allow_edit": "Installer",
+    "doc_status": "0",
+    "is_optional_state": 0,
+    "modified": "2025-01-27 10:00:00.000000",
+    "name": "Scheduled",
+    "workflow_state_name": "Scheduled"
+   },
+   {
+    "allow_edit": "Installer",
+    "doc_status": "0",
+    "is_optional_state": 0,
+    "modified": "2025-01-27 10:00:00.000000",
+    "name": "In Progress",
+    "workflow_state_name": "In Progress"
+   },
+   {
+    "allow_edit": "Installer",
+    "doc_status": "0",
+    "is_optional_state": 0,
+    "modified": "2025-01-27 10:00:00.000000",
+    "name": "Completed - Full",
+    "workflow_state_name": "Completed - Full"
+   },
+   {
+    "allow_edit": "Installer",
+    "doc_status": "0",
+    "is_optional_state": 0,
+    "modified": "2025-01-27 10:00:00.000000",
+    "name": "Completed - Partial",
+    "workflow_state_name": "Completed - Partial"
+   },
+   {
+    "allow_edit": "Operations Manager",
+    "doc_status": "0",
+    "is_optional_state": 0,
+    "modified": "2025-01-27 10:00:00.000000",
+    "name": "Verified",
+    "workflow_state_name": "Verified"
+   },
+   {
+    "allow_edit": "Operations Manager",
+    "doc_status": "1",
+    "is_optional_state": 0,
+    "modified": "2025-01-27 10:00:00.000000",
+    "name": "Closed",
+    "workflow_state_name": "Closed"
+   },
+   {
+    "allow_edit": "System Manager",
+    "doc_status": "2",
+    "is_optional_state": 0,
+    "modified": "2025-01-27 10:00:00.000000",
+    "name": "Cancelled",
+    "workflow_state_name": "Cancelled"
+   }
+  ],
+  "transitions": [
+   {
+    "action": "Start Installation",
+    "allow_self_approval": 1,
+    "allowed": "Installer",
+    "condition": null,
+    "doctype": "Workflow Transition",
+    "modified": "2025-01-27 10:00:00.000000",
+    "next_state": "In Progress",
+    "parent": "Installation Job Workflow",
+    "parentfield": "transitions",
+    "parenttype": "Workflow",
+    "state": "Scheduled"
+   },
+   {
+    "action": "Complete Installation",
+    "allow_self_approval": 1,
+    "allowed": "Installer",
+    "condition": null,
+    "doctype": "Workflow Transition",
+    "modified": "2025-01-27 10:00:00.000000",
+    "next_state": "Completed - Full",
+    "parent": "Installation Job Workflow",
+    "parentfield": "transitions",
+    "parenttype": "Workflow",
+    "state": "In Progress"
+   },
+   {
+    "action": "Complete Partial Installation",
+    "allow_self_approval": 1,
+    "allowed": "Installer",
+    "condition": null,
+    "doctype": "Workflow Transition",
+    "modified": "2025-01-27 10:00:00.000000",
+    "next_state": "Completed - Partial",
+    "parent": "Installation Job Workflow",
+    "parentfield": "transitions",
+    "parenttype": "Workflow",
+    "state": "In Progress"
+   },
+   {
+    "action": "Verify Installation",
+    "allow_self_approval": 1,
+    "allowed": "Operations Manager",
+    "condition": null,
+    "doctype": "Workflow Transition",
+    "modified": "2025-01-27 10:00:00.000000",
+    "next_state": "Verified",
+    "parent": "Installation Job Workflow",
+    "parentfield": "transitions",
+    "parenttype": "Workflow",
+    "state": "Completed - Full"
+   },
+   {
+    "action": "Verify Installation",
+    "allow_self_approval": 1,
+    "allowed": "Operations Manager",
+    "condition": null,
+    "doctype": "Workflow Transition",
+    "modified": "2025-01-27 10:00:00.000000",
+    "next_state": "Verified",
+    "parent": "Installation Job Workflow",
+    "parentfield": "transitions",
+    "parenttype": "Workflow",
+    "state": "Completed - Partial"
+   },
+   {
+    "action": "Close Job",
+    "allow_self_approval": 1,
+    "allowed": "Operations Manager",
+    "condition": null,
+    "doctype": "Workflow Transition",
+    "modified": "2025-01-27 10:00:00.000000",
+    "next_state": "Closed",
+    "parent": "Installation Job Workflow",
+    "parentfield": "transitions",
+    "parenttype": "Workflow",
+    "state": "Verified"
+   },
+   {
+    "action": "Cancel Job",
+    "allow_self_approval": 1,
+    "allowed": "System Manager",
+    "condition": null,
+    "doctype": "Workflow Transition",
+    "modified": "2025-01-27 10:00:00.000000",
+    "next_state": "Cancelled",
+    "parent": "Installation Job Workflow",
+    "parentfield": "transitions",
+    "parenttype": "Workflow",
+    "state": "Scheduled"
+   },
+   {
+    "action": "Cancel Job",
+    "allow_self_approval": 1,
+    "allowed": "System Manager",
+    "condition": null,
+    "doctype": "Workflow Transition",
+    "modified": "2025-01-27 10:00:00.000000",
+    "next_state": "Cancelled",
+    "parent": "Installation Job Workflow",
+    "parentfield": "transitions",
+    "parenttype": "Workflow",
+    "state": "In Progress"
+   }
+  ],
+  "workflow_name": "Installation Job Workflow",
+  "workflow_state_field": "status"
+ }
+]
