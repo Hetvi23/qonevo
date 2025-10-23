@@ -18,3 +18,10 @@ class InstallationJobItem(Document):
                 frappe.throw(_("Reason is required when item is not installed"))
         else:
             self.installation_status = "Pending"
+
+
+
+
+
+
+

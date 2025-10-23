@@ -16,7 +16,7 @@
  "label": "Barcode Management",
  "links": [
   {
-   "dependencies": [],
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Barcode Manager",
@@ -25,7 +25,7 @@
    "onboard": 1
   },
   {
-   "dependencies": [],
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Item Barcode Generator",
@@ -34,7 +34,7 @@
    "onboard": 0
   },
   {
-   "dependencies": [],
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Items",
@@ -43,7 +43,7 @@
    "onboard": 0
   },
   {
-   "dependencies": [],
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Delivery Note",
@@ -52,7 +52,7 @@
    "onboard": 0
   },
   {
-   "dependencies": [],
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Purchase Receipt",
@@ -61,7 +61,7 @@
    "onboard": 0
   },
   {
-   "dependencies": [],
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Stock Entry",
@@ -86,7 +86,7 @@
    "color": "#FF6B6B",
    "custom_format": 0,
    "doc_view": "",
-   "dependencies": [],
+   "dependencies": "",
    "hidden": 0,
    "icon": "barcode",
    "label": "Generate Barcode",
@@ -99,7 +99,7 @@
    "color": "#4ECDC4",
    "custom_format": 0,
    "doc_view": "",
-   "dependencies": [],
+   "dependencies": "",
    "hidden": 0,
    "icon": "qrcode",
    "label": "Scan Barcode",
@@ -112,7 +112,7 @@
    "color": "#45B7D1",
    "custom_format": 0,
    "doc_view": "",
-   "dependencies": [],
+   "dependencies": "",
    "hidden": 0,
    "icon": "truck",
    "label": "Delivery Note",

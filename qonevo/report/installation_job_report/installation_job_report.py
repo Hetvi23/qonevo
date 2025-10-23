@@ -136,3 +136,10 @@ def get_conditions(filters):
         conditions.append("ij.installation_date <= '{0}'".format(filters.get("to_date")))
     
     return " AND " + " AND ".join(conditions) if conditions else ""
+
+
+
+
+
+
+

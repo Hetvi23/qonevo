@@ -11,3 +11,10 @@ class InstallationJobPhoto(Document):
         """Validate Installation Job Photo data"""
         if not self.taken_date:
             self.taken_date = frappe.utils.today()
+
+
+
+
+
+
+

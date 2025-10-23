@@ -124,3 +124,8 @@ The Stock Entry form and other related forms should now work without any storage
 - All storage bin related functionality has been disabled
 - The system will now work with standard ERPNext stock management without storage bin features
 
+
+
+
+
+

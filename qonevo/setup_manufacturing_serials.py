@@ -68,3 +68,8 @@ def setup_manufacturing_serials():
 if __name__ == "__main__":
     setup_manufacturing_serials()
 
+
+
+
+
+

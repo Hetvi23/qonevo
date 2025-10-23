@@ -47,17 +47,6 @@ def generate_barcodes_for_existing_serials():
                 )
                 
                 if result.get("success"):
-                    # Create Item Barcode Generator record
-                    barcode_doc = frappe.get_doc({
-                        "doctype": "Item Barcode Generator",
-                        "item_code": serial.item_code,
-                        "model_number": model_number,
-                        "serial_number": serial.name,
-                        "barcode_type": "CODE128",
-                        "title": f"{serial.item_code} - {serial.name}"
-                    })
-                    barcode_doc.insert(ignore_permissions=True)
-                    
                     # Update serial number with barcode info
                     frappe.db.sql("""
                         UPDATE `tabSerial No` 

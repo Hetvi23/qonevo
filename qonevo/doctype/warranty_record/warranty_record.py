@@ -91,3 +91,10 @@ def extend_warranty(warranty_record, additional_years):
         "success": True,
         "message": _("Warranty {0} extended by {1} years").format(warranty_record, additional_years)
     }
+
+
+
+
+
+
+

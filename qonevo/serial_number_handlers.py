@@ -23,17 +23,6 @@ def after_insert(doc, method):
             )
             
             if result.get("success"):
-                # Create Item Barcode Generator record
-                barcode_doc = frappe.get_doc({
-                    "doctype": "Item Barcode Generator",
-                    "item_code": doc.item_code,
-                    "model_number": model_number,
-                    "serial_number": doc.name,
-                    "barcode_type": "CODE128",
-                    "title": f"{doc.item_code} - {doc.name}"
-                })
-                barcode_doc.insert(ignore_permissions=True)
-                
                 # Update serial number with barcode info using direct SQL to avoid validation issues
                 frappe.db.sql("""
                     UPDATE `tabSerial No` 
@@ -95,17 +84,6 @@ def generate_barcode_for_serial(doc):
             )
             
             if result.get("success"):
-                # Create Item Barcode Generator record
-                barcode_doc = frappe.get_doc({
-                    "doctype": "Item Barcode Generator",
-                    "item_code": doc.item_code,
-                    "model_number": model_number,
-                    "serial_number": doc.name,
-                    "barcode_type": "CODE128",
-                    "title": f"{doc.item_code} - {doc.name}"
-                })
-                barcode_doc.insert(ignore_permissions=True)
-                
                 # Update serial number with barcode info using direct SQL to avoid validation issues
                 frappe.db.sql("""
                     UPDATE `tabSerial No` 
