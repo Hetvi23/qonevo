@@ -59,6 +59,7 @@ def create_delivery_dashboard_workspace():
             "doctype": "Workspace",
             "name": "delivery-dashboard",
             "label": "Delivery Dashboard",
+            "title": "Delivery Dashboard",
             "extends": "Selling",
             "extends_another_page": 0,
             "for_user": "Administrator",
@@ -76,10 +77,10 @@ def create_delivery_dashboard_workspace():
                     "hidden": 0,
                     "icon": "chart-line",
                     "label": "Delivery Overview",
+                    "link_to": "delivery-dashboard-page",
                     "link_type": "Page",
                     "onboard": 0,
-                    "type": "Card Break",
-                    "dependencies": "delivery-dashboard-page"
+                    "type": "Link"
                 }
             ]
         })
@@ -107,10 +108,10 @@ def update_selling_workspace():
             "hidden": 0,
             "icon": "chart-line",
             "label": "Delivery Dashboard",
+            "link_to": "delivery-dashboard-page",
             "link_type": "Page",
             "onboard": 0,
-            "type": "Card Break",
-            "dependencies": "delivery-dashboard-page"
+            "type": "Link"
         })
         
         selling_workspace.save()

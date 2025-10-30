@@ -646,23 +646,11 @@ frappe.ui.form.on('Quotation', {
     }
 });
 
-// Add barcode scanner to Point of Sale (special case - it's a page)
-frappe.ready(function() {
-    // Check if we're on the Point of Sale page
-    if (frappe.get_route()[0] === 'point-of-sale') {
-        // Wait for the page to load
-        setTimeout(function() {
-            // Look for POS invoice form
-            let pos_form = frappe.get_route()[1];
-            if (pos_form && pos_form.includes('pos-invoice')) {
-                frappe.ui.form.on('POS Invoice', {
-                    refresh: function(frm) {
-                        if (frm.doc.docstatus === 0) { // Only for draft documents
-                            qonevo.clean_barcode_scanner.override_scan_barcode_field(frm, 'items');
-                        }
-                    }
-                });
-            }
-        }, 2000);
+// Add barcode scanner to POS Invoice
+frappe.ui.form.on('POS Invoice', {
+    refresh: function(frm) {
+        if (frm.doc.docstatus === 0) { // Only for draft documents
+            qonevo.clean_barcode_scanner.override_scan_barcode_field(frm, 'items');
+        }
     }
 });
