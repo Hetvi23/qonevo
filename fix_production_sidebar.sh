@@ -29,7 +29,64 @@ fi
 
 echo -e "${BLUE}📋 Step 1/5: Cleaning corrupted workspace data from database...${NC}"
 echo "--------------------------------------------------------------------------"
-bench --site qonevo.local execute qonevo.fix_production_sidebar.fix_sidebar_issues
+bench --site qonevo.local console <<'PYTHON_EOF'
+import frappe
+
+print("\n" + "="*70)
+print("🔧 CLEANING CORRUPTED WORKSPACE DATA")
+print("="*70 + "\n")
+
+# Check for corrupted workspaces
+corrupted_workspaces = frappe.db.sql("""
+    SELECT name, label, title, module, public
+    FROM `tabWorkspace` 
+    WHERE (title IS NULL OR title = '') 
+    AND name != 'Welcome Workspace'
+""", as_dict=True)
+
+if corrupted_workspaces:
+    print(f"⚠️  Found {len(corrupted_workspaces)} corrupted workspace(s):")
+    for ws in corrupted_workspaces:
+        print(f"   • {ws.name} (label: '{ws.label}', title: '{ws.title}')")
+    
+    print(f"\nDeleting {len(corrupted_workspaces)} corrupted workspace(s)...")
+    
+    for ws in corrupted_workspaces:
+        try:
+            # Delete related child tables first
+            frappe.db.sql("DELETE FROM `tabWorkspace Link` WHERE parent = %s", ws.name)
+            frappe.db.sql("DELETE FROM `tabWorkspace Shortcut` WHERE parent = %s", ws.name)
+            frappe.db.sql("DELETE FROM `tabWorkspace Chart` WHERE parent = %s", ws.name)
+            frappe.db.sql("DELETE FROM `tabWorkspace Number Card` WHERE parent = %s", ws.name)
+            frappe.db.sql("DELETE FROM `tabWorkspace Custom Block` WHERE parent = %s", ws.name)
+            frappe.db.sql("DELETE FROM `tabWorkspace Quick List` WHERE parent = %s", ws.name)
+            
+            # Delete the workspace
+            frappe.db.sql("DELETE FROM `tabWorkspace` WHERE name = %s", ws.name)
+            
+            print(f"   ✅ Deleted: {ws.name}")
+        except Exception as e:
+            print(f"   ❌ Error deleting {ws.name}: {e}")
+    
+    frappe.db.commit()
+    print(f"\n✅ Successfully deleted {len(corrupted_workspaces)} corrupted workspace(s)")
+else:
+    print("✅ No corrupted workspaces found")
+
+# Verify cleanup
+remaining_issues = frappe.db.sql("""
+    SELECT COUNT(*) as cnt
+    FROM `tabWorkspace` 
+    WHERE (title IS NULL OR title = '') 
+    AND name != 'Welcome Workspace'
+""", as_dict=True)[0]['cnt']
+
+if remaining_issues == 0:
+    print("\n✅ Database cleanup completed successfully!")
+else:
+    print(f"\n⚠️  Warning: Still found {remaining_issues} workspace(s) with issues")
+
+PYTHON_EOF
 
 if [ $? -ne 0 ]; then
     echo -e "${RED}❌ Database cleanup failed. Please check the errors above.${NC}"

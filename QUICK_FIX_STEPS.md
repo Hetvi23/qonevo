@@ -41,8 +41,34 @@ If the automated script doesn't work, follow these manual steps:
 ### Step 1: Clean Database
 ```bash
 cd /home/frappe/frappe-bench
-bench --site qonevo.local execute qonevo.fix_production_sidebar.fix_sidebar_issues
+bench --site qonevo.local console
 ```
+
+Then paste this code:
+```python
+import frappe
+
+corrupted = frappe.db.sql("""
+    SELECT name FROM `tabWorkspace` 
+    WHERE (title IS NULL OR title = '') 
+    AND name != 'Welcome Workspace'
+""", as_dict=True)
+
+for ws in corrupted:
+    frappe.db.sql("DELETE FROM `tabWorkspace Link` WHERE parent = %s", ws.name)
+    frappe.db.sql("DELETE FROM `tabWorkspace Shortcut` WHERE parent = %s", ws.name)
+    frappe.db.sql("DELETE FROM `tabWorkspace Chart` WHERE parent = %s", ws.name)
+    frappe.db.sql("DELETE FROM `tabWorkspace Number Card` WHERE parent = %s", ws.name)
+    frappe.db.sql("DELETE FROM `tabWorkspace Custom Block` WHERE parent = %s", ws.name)
+    frappe.db.sql("DELETE FROM `tabWorkspace Quick List` WHERE parent = %s", ws.name)
+    frappe.db.sql("DELETE FROM `tabWorkspace` WHERE name = %s", ws.name)
+    print(f"✅ Deleted {ws.name}")
+
+frappe.db.commit()
+print("✅ Done!")
+```
+
+Type `exit` to leave the console.
 
 ### Step 2: Clear Cache
 ```bash
