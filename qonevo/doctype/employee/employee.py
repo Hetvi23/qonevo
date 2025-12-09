@@ -4,7 +4,7 @@
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from qonevo.qonevo.doctype.ctc_salary_structure_template.ctc_salary_structure_template import (
+from qonevo.doctype.ctc_salary_structure_template.ctc_salary_structure_template import (
 	create_salary_structure_from_ctc,
 	get_matching_template
 )

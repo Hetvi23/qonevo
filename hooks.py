@@ -120,7 +120,7 @@ after_install = "qonevo.install.after_install"
 
 doc_events = {
 	"Employee": {
-		"validate": "qonevo.qonevo.doctype.employee.employee.validate_ctc_salary_structure"
+		"validate": "qonevo.doctype.employee.employee.validate_ctc_salary_structure"
 	},
 	"Serial No": {
 		"after_insert": "qonevo.serial_no_after_insert.after_insert",
