@@ -578,3 +578,163 @@ def get_requirement_dashboard_data():
         frappe.log_error(f"Error getting requirement dashboard data: {str(e)}")
         return []
 
+@frappe.whitelist()
+def create_opportunities_for_lead(lead_name):
+    """Create a separate Opportunity for each item in the Lead's items table"""
+    try:
+        lead = frappe.get_doc("Lead", lead_name)
+        
+        if not lead.items:
+            frappe.throw(_("No items found in Lead"))
+
+        customer_name = lead.customer
+        if not customer_name:
+            if frappe.db.exists("Customer", lead.lead_name):
+                customer_name = lead.lead_name
+            else:
+                customer = frappe.new_doc("Customer")
+                customer.customer_name = lead.lead_name
+                customer.customer_type = "Company"
+                customer.customer_group = "All Customer Groups"
+                customer.territory = lead.territory or "All Territories"
+                customer.lead_name = lead.name
+                customer.insert(ignore_permissions=True)
+                customer_name = customer.name
+                
+                lead.db_set("customer", customer_name)
+
+        created_opportunities = []
+        
+        for item in lead.items:
+            opp = frappe.new_doc("Opportunity")
+            
+            opp.opportunity_from = "Customer"
+            opp.party_name = customer_name
+            opp.opportunity_type = "Sales"
+            opp.source = lead.source
+            opp.title = item.item_name or item.item_code
+            opp.status = "Open"
+            opp.contact_email = lead.email_id
+            opp.contact_mobile = lead.mobile_no
+            opp.whatsapp = lead.whatsapp_no
+            opp.phone = lead.phone
+            opp.phone_ext = lead.phone_ext
+            opp.designation = lead.designation
+            opp.company = lead.company or frappe.db.get_single_value("Global Defaults", "default_company")
+
+            # Map item
+            opp.append("items", {
+                "item_code": item.item_code,
+                "item_name": item.item_name,
+                "rate": "10",
+                "qty": 1,
+                "uom": frappe.db.get_value("Item", item.item_code, "stock_uom")
+            })
+                
+            opp.insert(ignore_permissions=True)
+            
+            created_opportunities.append({
+                "name": opp.name,
+                "url": frappe.utils.get_url_to_form("Opportunity", opp.name)
+            })
+            
+        return created_opportunities
+        
+    except Exception as e:
+        frappe.log_error(f"Error creating opportunities for lead {lead_name}: {str(e)}")
+        raise e
+
+@frappe.whitelist()
+def get_customer_connections_html(customer):
+    """Get HTML dashboard for Customer connections (Lead -> Opportunity -> Quotation)"""
+    try:
+        opportunities = frappe.get_all("Opportunity", 
+            filters={"party_name": customer, "opportunity_from": "Customer"},
+            fields=["name", "title", "status", "opportunity_amount", "creation"]
+        )
+        
+        lead_name = frappe.db.get_value("Customer", customer, "lead_name")
+        lead_link = f"<a href='/app/lead/{lead_name}' target='_blank' style='font-weight:500;'>{lead_name}</a>" if lead_name else "-"
+
+        html = """
+        <div style="border: 1px solid #d1d8dd; border-radius: 8px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+            <table class="table table-bordered mb-0" style="width:100%; font-size: 13px;">
+                <thead style="background-color: #f8f9fa; color: #495057;">
+                    <tr>
+                        <th style="width:25%; font-weight: 600; padding: 12px 15px;">Lead</th>
+                        <th style="width:25%; font-weight: 600; padding: 12px 15px;">Opportunity</th>
+                        <th style="width:25%; font-weight: 600; padding: 12px 15px;">Quotation</th>
+                        <th style="width:25%; font-weight: 600; padding: 12px 15px;">Perfoma Invoice</th>
+                    </tr>
+                </thead>
+                <tbody>
+        """
+        
+        if opportunities:
+            for opp in opportunities:
+                quotations = frappe.get_all("Quotation",
+                    filters={"opportunity": opp.name},
+                    fields=["name", "status"]
+                )
+                
+                quotation_links = []
+                sales_order_links = [] # Collect SOs from all quotations
+                
+                for q in quotations:
+                    status_color = "green" if q.status != "Lost" else "red"
+                    q_link = f"""<div style="margin-bottom: 4px;">
+                        <a href='/app/quotation/{q.name}' target='_blank' style='font-weight:500;'>{q.name}</a>
+                        <span class="indicator-pill {status_color} no-indicator-dot" style="font-size: 10px; padding: 2px 6px;">{q.status}</span>
+                    </div>"""
+                    quotation_links.append(q_link)
+                    
+                    # Fetch Sales Orders linked to this Quotation
+                    sales_orders = frappe.get_all("Sales Order", 
+                        filters=[["Sales Order Item", "prevdoc_docname", "=", q.name], ["docstatus", "!=", 2]],
+                        fields=["name", "status"],
+                        distinct=True
+                    )
+                    
+                    for so in sales_orders:
+                         so_status_color = "green" if so.status not in ["Cancelled", "Closed"] else "red"
+                         so_link = f"""<div style="margin-bottom: 4px;">
+                            <a href='/app/sales-order/{so.name}' target='_blank' style='font-weight:500;'>{so.name}</a>
+                            <span class="indicator-pill {so_status_color} no-indicator-dot" style="font-size: 10px; padding: 2px 6px;">{so.status}</span>
+                        </div>"""
+                         sales_order_links.append(so_link)
+                
+                quotations_html = "".join(quotation_links) if quotation_links else "<span class='text-muted'>-</span>"
+                sales_orders_html = "".join(list(set(sales_order_links))) if sales_order_links else "<span class='text-muted'>-</span>" # Unique SOs
+                
+                opp_link = f"""<div style="font-weight:500;"><a href='/app/opportunity/{opp.name}' target='_blank'>{opp.name}</a></div>
+                             <div class="text-muted" style="font-size: 12px; margin-top: 2px;">{opp.title or ''}</div>"""
+                
+                html += f"""
+                <tr style="transition: background-color 0.2s;">
+                    <td style="padding: 12px 15px; vertical-align: middle;">{lead_link}</td>
+                    <td style="padding: 12px 15px; vertical-align: middle;">{opp_link}</td>
+                    <td style="padding: 12px 15px; vertical-align: middle;">{quotations_html}</td>
+                    <td style="padding: 12px 15px; vertical-align: middle;">{sales_orders_html}</td>
+                </tr>
+                """
+        else:
+            html += f"""
+            <tr>
+                <td style="padding: 12px 15px;">{lead_link}</td>
+                <td colspan="3" class="text-center text-muted" style="padding: 20px;">
+                    No Opportunities found for this Customer
+                </td>
+            </tr>
+            """
+
+        html += """
+                </tbody>
+            </table>
+        </div>
+        """
+        
+        return html
+        
+    except Exception as e:
+        frappe.log_error(f"Error getting customer dashboard: {str(e)}")
+        return f"<div class='alert alert-danger'>Error loading dashboard: {str(e)}</div>"
