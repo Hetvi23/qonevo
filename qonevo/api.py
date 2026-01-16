@@ -621,6 +621,7 @@ def create_opportunities_for_lead(lead_name):
             opp.phone_ext = lead.phone_ext
             opp.designation = lead.designation
             opp.company = lead.company or frappe.db.get_single_value("Global Defaults", "default_company")
+            opp.organisation_name = lead.company_name
 
             # Map item
             opp.append("items", {
